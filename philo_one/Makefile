@@ -6,7 +6,7 @@
 #    By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/12/19 23:21:49 by lmartin           #+#    #+#              #
-#    Updated: 2019/12/20 13:49:22 by lmartin          ###   ########.fr        #
+#    Updated: 2020/03/05 21:35:40 by lmartin          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -58,7 +58,7 @@ RM			=	rm -rf
 
 # DIRECTORIES #
 
-DIR_HEADERS =	../includes/
+DIR_HEADERS =	./includes/
 
 DIR_SRCS	=	./srcs/
 
@@ -68,6 +68,7 @@ DIR_OBJS	=	./compiled_srcs/
 # FILES #
 
 SRC			=	errors.c \
+				forks.c \
 				ft_atos.c \
 				ft_strlen.c \
 				philo_one.c

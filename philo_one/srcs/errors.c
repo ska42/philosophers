@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/12/19 23:44:34 by lmartin           #+#    #+#             */
-/*   Updated: 2020/03/05 03:25:43 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/03/05 20:54:55 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,8 @@ int		throw_error(char *name, int nb_error)
 		nb_error = write_msg_error(name, MSG_ERR_WRONG_ARG);
 	else if (nb_error == ERR_MUTEX_INIT)
 		nb_error = write_msg_error(name, MSG_ERR_MUTEX_INIT);
+	else if (nb_error == ERR_PTHREAD_CREATE)
+		nb_error = write_msg_error(name, MSG_ERR_PTHREAD_CREATE);
 	return (nb_error);
 }
 

@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/12/19 22:52:03 by lmartin           #+#    #+#             */
-/*   Updated: 2020/03/05 03:01:28 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/03/05 21:36:24 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,14 +23,29 @@
 #include "utils.h"
 #include "forks.h"
 
-typedef struct		s_philosophers
+typedef struct		s_parameters
 {
-	char				*name;
 	size_t				number_of_philosopher;
 	size_t				time_to_die;
+	size_t				time_to_eat;
 	size_t				time_to_sleep;
 	size_t				number_of_time_each_philosophers_must_eat;
+}					t_parameters;
+
+typedef struct		s_philosopher
+{
+	size_t				number;
+	t_parameters		*parameters;
+	t_lstforks			*left_fork;
+	t_lstforks			*right_fork;
+}					t_philosopher;
+
+typedef struct		s_program
+{
+	char				*name;
+	t_parameters		*parameters;
+	pthread_t			*philosophers;
 	t_lstforks			*forks;
-}					t_philosophers;
+}					t_program;
 
 #endif
