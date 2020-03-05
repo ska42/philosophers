@@ -6,7 +6,7 @@
 #    By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/12/19 23:21:49 by lmartin           #+#    #+#              #
-#    Updated: 2019/12/19 23:23:37 by lmartin          ###   ########.fr        #
+#    Updated: 2019/12/20 13:49:22 by lmartin          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -67,7 +67,10 @@ DIR_OBJS	=	./compiled_srcs/
 
 # FILES #
 
-SRC			=	philo_one.c
+SRC			=	errors.c \
+				ft_atos.c \
+				ft_strlen.c \
+				philo_one.c
 
 SRCS		=	$(SRC)
 
