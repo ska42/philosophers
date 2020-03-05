@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/12/19 22:52:03 by lmartin           #+#    #+#             */
-/*   Updated: 2020/03/05 21:36:24 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/03/05 22:42:07 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@
 #include "errors.h"
 #include "utils.h"
 #include "forks.h"
+#include "logs.h"
 
 typedef struct		s_parameters
 {
@@ -47,5 +48,8 @@ typedef struct		s_program
 	pthread_t			*philosophers;
 	t_lstforks			*forks;
 }					t_program;
+
+t_philosopher	*new_philosopher(size_t number, t_lstforks *left_fork,
+t_lstforks *right_fork, t_parameters *parameters);
 
 #endif
