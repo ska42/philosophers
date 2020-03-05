@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/12/19 23:44:34 by lmartin           #+#    #+#             */
-/*   Updated: 2019/12/20 13:52:40 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/03/05 03:25:43 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,12 +18,16 @@
 
 int		throw_error(char *name, int nb_error)
 {
-	if (nb_error == ERR_NB_ARGS)
-		if (write_msg_error(name, MSG_ERR_NB_ARGS) < 0)
-			return (ERR_WRITE);
-	if (nb_error == ERR_WRONG_ARG)
-		if (write_msg_error(name, MSG_ERR_WRONG_ARG) < 0)
-			return (ERR_WRITE);
+	if (nb_error == ERR_MALLOC)
+		nb_error = write_msg_error(name, MSG_ERR_MALLOC);
+	else if (nb_error == ERR_WRITE)
+		nb_error = write_msg_error(name, MSG_ERR_WRITE);
+	else if (nb_error == ERR_NB_ARGS)
+		nb_error = write_msg_error(name, MSG_ERR_NB_ARGS);
+	else if (nb_error == ERR_WRONG_ARG)
+		nb_error = write_msg_error(name, MSG_ERR_WRONG_ARG);
+	else if (nb_error == ERR_MUTEX_INIT)
+		nb_error = write_msg_error(name, MSG_ERR_MUTEX_INIT);
 	return (nb_error);
 }
 

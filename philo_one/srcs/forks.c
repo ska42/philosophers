@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/12/20 21:22:55 by lmartin           #+#    #+#             */
-/*   Updated: 2019/12/20 21:47:35 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/03/05 03:13:20 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ t_lstforks	*new_fork()
 
 	if (!(fork = malloc(sizeof(t_lstforks))))
 		return (NULL);
-	if (!(fork->fork = malloc(sizeof(pthread_mutex_t))))
+	if (!(fork->lock = malloc(sizeof(pthread_mutex_t))))
 	{
 		free(fork);
 		return (NULL);

@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/12/19 22:51:31 by lmartin           #+#    #+#             */
-/*   Updated: 2019/12/20 22:02:39 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/03/05 03:23:24 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ int			init_philosophers(t_philosophers *phi, char *argv[])
 		return (throw_error((*phi).name, ERR_WRONG_ARG));
 	if (ft_atos(argv[4], &(*phi).number_of_time_each_philosophers_must_eat) < 0)
 		return (throw_error((*phi).name, ERR_WRONG_ARG));
-	i = ((*phi).number_of_philosopher == 1) : 2 ? (*phi).number_of_philosopher;
+	i = (*phi).number_of_philosopher;
 	while (--i)
 		if (forks_add_back(&(*phi).forks) < 0)
 			return (ERR_MALLOC);
@@ -36,9 +36,17 @@ int			init_philosophers(t_philosophers *phi, char *argv[])
 
 int			main(int argc, char *argv[])
 {
+	t_lstforks		*fork;
 	int				ret;
-	t_philosophers	philos;
+	t_philosophers	phi;
 
-	if ((ret = init_philosophers(&philos, argv)) < 0)
-		return (ret);
+	if ((ret = init_philosophers(&phi, argv)) < 0)
+		return (throw_error(phi.name, ret));
+	fork = phi->forks;
+	while (fork->next)
+	{
+		if (pthread_mutex_init(fork->lock, NULL))
+			return (throw_error(phi.name, ERR_MUTEX_INIT));
+		fork = fork->next;	
+	}
 }
