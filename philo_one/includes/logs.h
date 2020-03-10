@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/05 22:08:31 by lmartin           #+#    #+#             */
-/*   Updated: 2020/03/10 02:08:12 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/03/10 04:23:35 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,6 @@ typedef struct	s_date
 	int			millisecond;
 }				t_date;
 
-int				logs(size_t number, char *msg);
+int				logs(struct timeval *tv, size_t number, char *msg);
 
 #endif

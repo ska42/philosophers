@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/12/19 22:52:03 by lmartin           #+#    #+#             */
-/*   Updated: 2020/03/10 02:09:29 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/03/10 05:12:09 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,8 @@ typedef struct		s_philosopher
 	t_parameters	*parameters;
 	t_lstforks		*left_fork;
 	t_lstforks		*right_fork;
+	struct timeval	*last_meal;
+	void			*next;	
 }					t_philosopher;
 
 typedef struct		s_program

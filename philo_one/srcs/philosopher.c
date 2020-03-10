@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/05 22:36:42 by lmartin           #+#    #+#             */
-/*   Updated: 2020/03/05 22:46:55 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/03/10 05:12:28 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,5 +27,7 @@ t_lstforks *right_fork, t_parameters *parameters)
 	philosopher->left_fork = left_fork;
 	philosopher->right_fork = right_fork;
 	philosopher->parameters = parameters;
+	philosopher->last_meal = NULL;
+	philosopher->next = NULL;
 	return (philosopher);
 }

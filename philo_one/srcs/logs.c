@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/10 02:03:03 by lmartin           #+#    #+#             */
-/*   Updated: 2020/03/10 02:06:51 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/03/10 04:23:16 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,16 +84,14 @@ void	get_date(int days, t_date *date)
 ** Print the timestamp with gettimeofday
 */
 
-int		fill_timestamp(char **timestamp)
+int		fill_timestamp(struct timeval *tv, char **timestamp)
 {
-	struct timeval	tv;
 	t_date			date;
 
-	gettimeofday(&tv, NULL);
-	get_date(tv.tv_sec / (60 * 60 * 24), &date);
-	get_time(tv.tv_sec - ((int)(tv.tv_sec / (60 * 60 * 24)) * 60 * 60 * 24),
+	get_date(tv->tv_sec / (60 * 60 * 24), &date);
+	get_time(tv->tv_sec - ((int)(tv->tv_sec / (60 * 60 * 24)) * 60 * 60 * 24),
 &date);
-	date.millisecond = tv.tv_usec / 1000;
+	date.millisecond = tv->tv_usec / 1000;
 	fill_nbr(date.year, timestamp);
 	*(*timestamp)++ = '-';
 	fill_nbr(date.month, timestamp);
@@ -118,7 +116,7 @@ int		fill_timestamp(char **timestamp)
 ** timestamp_in_ms number msg
 */
 
-int		logs(size_t number, char *msg)
+int		logs(struct timeval *tv, size_t number, char *msg)
 {
 	int		ret;
 	char	*ptr;
@@ -133,7 +131,7 @@ int		logs(size_t number, char *msg)
 	if (!(log = malloc(sizeof(char) * (size_nb))))
 		return (ERR_MALLOC);
 	ptr = log;
-	if ((ret = fill_timestamp(&ptr)) < 0)
+	if ((ret = fill_timestamp(tv, &ptr)) < 0)
 		return (ret);
 	*ptr++ = ' ';
 	fill_nbr(number, &ptr);
