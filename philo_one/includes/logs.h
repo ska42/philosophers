@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/05 22:08:31 by lmartin           #+#    #+#             */
-/*   Updated: 2020/03/05 23:47:43 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/03/10 02:08:12 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,17 @@
 # define MSG_THINKING "is thinking"
 # define MSG_DEATH "died"
 
-int		logs(size_t number, char *msg);
+typedef struct	s_date
+{
+	int			year;
+	int			month;
+	int			day;
+	int			hour;
+	int			minute;
+	int			second;
+	int			millisecond;
+}				t_date;
+
+int				logs(size_t number, char *msg);
 
 #endif

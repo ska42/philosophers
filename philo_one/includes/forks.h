@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/12/20 21:41:58 by lmartin           #+#    #+#             */
-/*   Updated: 2020/03/05 21:40:17 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/03/10 02:07:53 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,8 @@ typedef struct		s_lstforks
 	void			*next;
 }					t_lstforks;
 
-int			init_locks(t_lstforks **forks);
-t_lstforks	*new_fork();
-int			forks_add_back(t_lstforks **forks);
+int					init_locks(t_lstforks **forks);
+t_lstforks			*new_fork();
+int					forks_add_back(t_lstforks **forks);
 
 #endif

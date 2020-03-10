@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/12/20 21:22:55 by lmartin           #+#    #+#             */
-/*   Updated: 2020/03/05 21:54:49 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/03/10 02:10:13 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ int			init_locks(t_lstforks **forks)
 {
 	t_lstforks	*ptr;
 
-	ptr = *forks;	
+	ptr = *forks;
 	while (ptr->next)
 	{
 		if (pthread_mutex_init(ptr->lock, NULL))
@@ -34,7 +34,7 @@ int			init_locks(t_lstforks **forks)
 ** Create a new t_lstforks with her fork
 */
 
-t_lstforks	*new_fork()
+t_lstforks	*new_fork(void)
 {
 	t_lstforks	*fork;
 
@@ -53,7 +53,7 @@ t_lstforks	*new_fork()
 ** Add a t_lstforks at the end of forks
 */
 
-int		forks_add_back(t_lstforks **forks)
+int			forks_add_back(t_lstforks **forks)
 {
 	t_lstforks	*ptr;
 
