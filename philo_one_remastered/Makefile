@@ -67,9 +67,9 @@ DIR_OBJS	=	./compiled_srcs/
 
 # FILES #
 
-SRC			=	error.c \
-				logs.c \
-				philo_one.c	
+SRC			=	logs.c \
+				utils.c \
+				philo_one.c
 
 SRCS		=	$(SRC)
 

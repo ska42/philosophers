@@ -9,14 +9,15 @@
 
 # include "error.h"
 # include "logs.h"
+# include "utils.h"
 
 typedef struct		s_parameters
 {
-	size_t			number_of_philosopher;
+	int				number_of_philosopher;
 	size_t			time_to_die;
 	size_t			time_to_eat;
 	size_t			time_to_sleep;
-	size_t			number_of_time_each_philosophers_must_eat;
+	int				number_of_time_each_philosophers_must_eat;
 }					t_parameters;
 
 typedef struct		s_philosopher
