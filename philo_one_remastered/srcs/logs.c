@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/09 00:03:02 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/09 01:13:08 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/06/09 03:05:34 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,10 @@ int		throw_error(char *prg_name, int error)
 		msg_error(prg_name, "Wrong argument");
 	else if (error == ERROR_MALLOC)
 		msg_error(prg_name, "malloc error");
+	else if (error == ERROR_MUTEX)
+		msg_error(prg_name, "mutex error");
+	else if (error == ERROR_PTHREAD)
+		msg_error(prg_name, "pthread error");
 	return (error);
 }
 

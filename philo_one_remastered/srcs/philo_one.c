@@ -6,13 +6,55 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/09 00:07:02 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/09 01:42:31 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/06/09 04:16:05 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo_one.h"
 
 /*
+** function: {launch_philosophers}
+**
+** parameters:
+** (t_philo_one *){phi} - program's structure
+**
+** return (int): error's code
+**
+** description:
+** allocate and setup the lock on last_meal and 
+** launch all pthread on philosophers
+*/
+
+int		launch_philosophers(t_philo_one *phi)
+{
+	t_philosopher *ptr;
+
+	if (!(lock_start = malloc(sizeof(pthread_mutex_t))))
+		return (ERROR_MALLOC);
+	gettimeofday(&phi->parameters->time_start, NULL);
+	ptr = phi->philosopher;
+	while (ptr)
+	{
+		if (!(ptr->lock_last_meal = malloc(sizeof(pthread_mutex_t))))
+			return (ERROR_MALLOC);
+		if (pthread_mutex_init(ptr->lock_last_meal, NULL))
+			return (ERROR_MUTEX);
+		if (pthread_create(ptr->thread, NULL, &alive, ptr)) //TODO: do function
+			return (ERROR_PTHREAD);
+		ptr = ptr->next;
+	}
+	return (0);
+}
+
+/*
+** function: {init_philosophers}
+**
+** parameters:
+** (t_philo_one *){phi} - program's structure
+**
+** return (int): error's code
+**
+** description:
 ** init all philosophers
 */
 
@@ -46,7 +88,17 @@ phi->philosophers->left_fork : malloc(sizeof(pthread_mutex_t));
 }
 
 /*
-** init all arguments
+** function: {init_args}
+**
+** parameters:
+** (int){argc} - number of arguments {argv},
+** (char **){argv} - array of (char *) arguments,
+** (t_philo_one){phi} - pointer to stucture to fill
+**
+** return (int): too many arguments, wrong argument or others...
+**
+** description:
+** init all arguments from {argv}
 */
 
 int		init_args(int argc, char *argv[], t_philo_one *phi)
@@ -73,6 +125,20 @@ int		init_args(int argc, char *argv[], t_philo_one *phi)
 	return (0);
 }
 
+/*
+** PHILO_ONE
+**
+** description:
+** philosopher with threads and mutex.
+**
+** special rules:
+** 1. One fork between each philosopher, therefore there will be a fork at the
+** right and at the left of each philosopher.
+** 2. To avoid philosophers duplicating forks, you should protect the forks
+** state with a mutex for each of them.
+** 3. Each philosopher should be a thread.
+*/
+
 int		main(int argc, char *argv[])
 {
 	int				ret;
@@ -83,4 +149,7 @@ int		main(int argc, char *argv[])
 		return (throw_error(phi.name, ret));
 	if ((ret = init_philosophers(&phi)))
 		return (throw_error(phi.name, ret));
+	if ((ret = launch_philosophers(&phi)))
+		return (throw_error(phi.name, ret));
+
 }
