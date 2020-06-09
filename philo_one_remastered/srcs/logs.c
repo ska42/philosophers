@@ -1,6 +1,27 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   logs.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2020/06/09 00:03:02 by lmartin           #+#    #+#             */
+/*   Updated: 2020/06/09 01:13:08 by lmartin          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "philo_one.h"
 
 /*
+** function: {msg_error}
+**
+** parameters:
+** (char *){prg_name} - program's name,
+** (char *){msg} - error's message (ex: malloc error)
+**
+** return (void)
+**
+** description:
 ** send an error in stderr_fileno as:
 ** "prg_name: msg_error"
 */
@@ -14,7 +35,16 @@ void	msg_error(char *prg_name, char *msg)
 }
 
 /*
-** call msg_error by corresponding the given error code "error" with a message
+** function: {throw_error}
+**
+** parameters:
+** (char *){prg_name} - program's name,
+** (int) {error} - error's number
+**
+** return (int): error's number
+**
+** description:
+** call msg_error by corresponding the given error code {error} with a message
 */
 
 int		throw_error(char *prg_name, int error)
@@ -23,7 +53,54 @@ int		throw_error(char *prg_name, int error)
 		msg_error(prg_name, "Wrong number of arguments");
 	else if (error == WRONG_ARG)
 		msg_error(prg_name, "Wrong argument");
-	else if (error = ERROR_MALLOC)
+	else if (error == ERROR_MALLOC)
 		msg_error(prg_name, "malloc error");
 	return (error);
+}
+
+/*
+** function: {logs}
+**
+** parameters:
+** (timeval *){st} - timeval start of the program,
+** (timeval *){tv} - actual timeval,
+** (size_t){number} - philosopher's number,
+** (char *){msg} - msg of the current philosopher
+**
+** return (int): no-null if error
+**
+** description:
+** print on stdin the status of the {number} philosopher at a time {tv} like :
+** "timestamp_in_ms number msg"
+*/
+
+// TODO: Don't forget to add /n to every msg to get rid of that one line for norminette
+
+int		logs(struct timeval *st, struct timeval *tv, size_t number, char *msg)
+{
+	char		*ptr;
+	char		*log;
+	size_t		size_nb;
+	long long	temp;
+	long long	time;
+
+	temp = number * 10;
+	size_nb = 4 + ft_strlen(msg);
+	while (temp /= 10)
+		size_nb++;
+	time = (tv->tv_sec - st->tv_sec) * 1000000000 + (tv->tv_usec - st->tv_usec);
+	temp = time * 10;
+	while (temp /= 10)
+		size_nb++;
+	if (!(log = malloc(sizeof(char) * (size_nb))))
+		return (ERROR_MALLOC);
+	ptr = log;
+	fill_nbr((size_t)time, &ptr);
+	fill_msg("ms ", &ptr);
+	fill_nbr(size_nb, &ptr);
+	*ptr++ = ' ';
+	fill_msg(msg, &ptr);
+	write(STDIN_FILENO, log, size_nb);
+	free(log);
+	return (0);
 }

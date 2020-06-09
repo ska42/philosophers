@@ -6,7 +6,7 @@
 #    By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/12/19 23:21:49 by lmartin           #+#    #+#              #
-#    Updated: 2020/03/05 22:42:46 by lmartin          ###   ########.fr        #
+#    Updated: 2020/03/10 23:05:31 by lmartin          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -73,7 +73,8 @@ SRC			=	errors.c \
 				ft_strlen.c \
 				logs.c \
 				philo_one.c \
-				philosopher.c
+				philosopher.c \
+				action.c
 
 SRCS		=	$(SRC)
 

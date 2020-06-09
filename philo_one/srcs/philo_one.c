@@ -6,90 +6,28 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/12/19 22:51:31 by lmartin           #+#    #+#             */
-/*   Updated: 2020/03/10 05:18:01 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/03/10 21:38:57 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philosophers.h"
-#include <stdio.h>
 
-void		*alive(void *args)
-{	
-	struct timeval	tv;
-	t_philosopher *philosopher;
-
-	philosopher = (t_philosopher *)args;
-	while (1) // TODO: wait for others thread to die nb time each philosophers must eat 
-	{
-		gettimeofday(&tv, NULL);
-		logs(&tv, philosopher->number, MSG_THINKING);
-		pthread_mutex_lock(philosopher->left_fork->lock);
-		pthread_mutex_lock(philosopher->right_fork->lock);
-		gettimeofday(&philosopher->last_meal, NULL);
-		logs(&philosopher->last_meal, philosopher->number, MSG_EATING);
-		usleep(philosopher->parameters->time_to_eat);
-		pthread_mutex_unlock(philosopher->left_fork->lock);
-		pthread_mutex_unlock(philosopher->right_fork->lock);
-		gettimeofday(&tv, NULL);
-		logs(&tv, philosopher->number, MSG_SLEEPING);
-		usleep(philosopher->parameters->time_to_sleep);
-	}
-	return (NULL);
-}
-
-int			init_philosophers(t_program *phi)
-{	
-	size_t			number;
-	t_lstforks		*fork;
-	pthread_t		*ptr;
-	t_philosopher	*first;
-	t_philosopher	*philosopher;
-	t_philosopher	*prev;
-	
-	number = 1;
-	fork = phi->forks;
-	ptr = phi->philosophers;
-	prev = NULL;
-	while (fork)
-	{
-		if (!(philosopher = new_philosopher(number, fork,
-(fork->next) ? fork->next : phi->forks, phi->parameters)))
-			return (ERR_MALLOC);
-		if (prev)
-			prev->next = philosopher;
-		else
-			first = philosopher;
-		if (pthread_create(ptr, NULL, &alive, philosopher))
-			return (ERR_PTHREAD_CREATE);
-		number++;
-		ptr++;
-		prev = philosopher;
-		fork = fork->next;
-	}
-	ptr = phi->philosophers;
-	while (1)
-	{
-		philosopher = first;
-		while (philosopher)
-		{
-			philosopher = (!philosopher->next) ? first : philosopher->next;
-		}	
-	}
-	/*	
-	while (*ptr)
-	{
-		pthread_join(*ptr, NULL);	
-		ptr++;
-	}*/
-	// TODO: free all philosophers
-	return (0);
-}
+/*
+** Check for arguments (like too few philosophers)
+*/
 
 int			check_args(t_program *phi) // TODO: Check args like nb philosophers or nb_eat
 {
 	(void)phi;
 	return (0);
 }
+
+/*
+** init program parameters:
+** program number_of_philosopher time_to_die time_to_eattime_to_sleep
+** [number_of_time_each_philosophers_must_eat]
+** and put it in t_program *phi
+*/
 
 int			init_program(t_program *phi, char *argv[])
 {
@@ -119,6 +57,10 @@ phi->parameters->number_of_philosopher)))
 		return (ERR_MALLOC);
 	return (0);
 }
+
+/*
+** PHILOSOPHERS PHILO_ONE
+*/
 
 int			main(int argc, char *argv[])
 {

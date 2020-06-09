@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   philo_one.h                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2020/06/09 01:06:47 by lmartin           #+#    #+#             */
+/*   Updated: 2020/06/09 01:38:52 by lmartin          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef PHILO_ONE_H
 # define PHILO_ONE_H
 
@@ -7,7 +19,7 @@
 # include <pthread.h>
 # include <string.h>
 
-# include "error.h"
+# include "errors.h"
 # include "logs.h"
 # include "utils.h"
 
@@ -22,7 +34,7 @@ typedef struct		s_parameters
 
 typedef struct		s_philosopher
 {
-	size_t			number;
+	size_t			nb;
 	t_parameters	*parameters;
 	pthread_t		*thread;
 	pthread_mutex_t	*left_fork;
@@ -35,7 +47,7 @@ typedef struct		s_philo_one
 {
 	char			*name;
 	t_parameters	*parameters;
-	s_philosopher	*philosophers;
+	t_philosopher	*philosophers;
 }					t_philo_one;
 
 #endif
