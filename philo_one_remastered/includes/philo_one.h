@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/09 01:06:47 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/09 04:08:39 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/06/11 23:19:50 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,20 +24,10 @@
 # include "utils.h"
 # include "status.h"
 
-typedef struct		s_parameters
-{
-	int				number_of_philosopher;
-	size_t			time_to_die;
-	size_t			time_to_eat;
-	size_t			time_to_sleep;
-	int				number_of_time_each_philosophers_must_eat;
-	pthread_mutex_t	*lock_start;
-	struct timeval	*time_start;
-}					t_parameters;
-
 typedef struct		s_philosopher
 {
 	size_t			nb;
+	size_t			nb_eat;
 	t_parameters	*parameters;
 	pthread_t		*thread;
 	pthread_mutex_t	*left_fork;

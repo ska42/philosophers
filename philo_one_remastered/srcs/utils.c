@@ -6,11 +6,46 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/09 00:07:09 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/09 01:50:46 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/06/12 00:10:49 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo_one.h"
+
+/*
+** function {copy_parameters}
+**
+** parameters:
+** (t_parameters *){parameters} - parameters to copy
+**
+** return (t_parameters *) : a pointer to a copy of {parameters}
+**
+** description:
+** malloc, and copy all parameters of the (t_parameters *) and return a pointer
+** to it.
+*/
+
+t_parameters	*copy_parameters(t_parameters *parameters)
+{
+	t_parameters	*copy;
+
+	if (!(copy = malloc(sizeof(t_parameters))))
+		return (NULL);
+	copy->number_of_philosopher = parameters->number_of_philosopher;
+	copy->time_to_die = parameters->time_to_die;
+	copy->time_to_eat = parameters->time_to_eat;
+	copy->time_to_sleep = parameters->time_to_sleep;
+	copy->number_of_time_each_philosophers_must_eat =
+parameters->number_of_time_each_philosophers_must_eat;
+	if (!(copy->time_start = malloc(sizeof(struct timeval))))
+	{
+		free(copy);
+		return (NULL);
+	}
+	copy->time_start->tv_sec = parameters->time_start->tv_sec;
+	copy->time_start->tv_usec = parameters->time_start->tv_usec;
+	return (copy);
+}
 
 /*
 ** function: {fill_msg}
@@ -25,9 +60,9 @@
 ** Put the {msg} into {ptr}
 */
 
-void	fill_msg(char *msg, char **ptr)
+void			fill_msg(char *msg, char **ptr)
 {
-	while (msg)
+	while (*msg)
 		*(*ptr)++ = *msg++;
 }
 
@@ -44,14 +79,12 @@ void	fill_msg(char *msg, char **ptr)
 ** Convert the number {nbr} into a (char *) and fill it into {ptr}
 */
 
-void	fill_nbr(size_t nbr, char **ptr)
+void			fill_nbr(size_t nbr, char **ptr)
 {
 	char			c;
 	size_t			nnbr;
 	long long int	pow;
 
-	if (nbr <= 9 && (c = '0'))
-		*(*ptr)++ = c;
 	pow = 10;
 	nnbr = nbr;
 	while (nnbr /= 10)
@@ -75,7 +108,7 @@ void	fill_nbr(size_t nbr, char **ptr)
 ** Calculate the len of string s
 */
 
-size_t	ft_strlen(const char *s)
+size_t			ft_strlen(const char *s)
 {
 	size_t i;
 
@@ -87,18 +120,18 @@ size_t	ft_strlen(const char *s)
 
 /*
 ** function {ft_atos}
-** 
+**
 ** parameters:
 ** (char *){str} - the string to parse,
 ** (size_t *){nb} - a pointer to the size_t to fill
 **
 ** return (int): return -1 if str is empty or str didn't finished by a number
 **
-** description: 
+** description:
 ** transform ascii to size_t and put it in {nb}
 */
 
-int		ft_atos(char *str, size_t *nb)
+int				ft_atos(char *str, size_t *nb)
 {
 	if (*str == '\0')
 		return (-1);

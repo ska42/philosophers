@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/09 00:03:02 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/09 03:05:34 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/06/12 00:13:54 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,7 @@ int		throw_error(char *prg_name, int error)
 ** "timestamp_in_ms number msg"
 */
 
-// TODO: Don't forget to add /n to every msg to get rid of that one line for norminette
+#include <stdio.h>
 
 int		logs(struct timeval *st, struct timeval *tv, size_t number, char *msg)
 {
@@ -92,7 +92,8 @@ int		logs(struct timeval *st, struct timeval *tv, size_t number, char *msg)
 	size_nb = 4 + ft_strlen(msg);
 	while (temp /= 10)
 		size_nb++;
-	time = (tv->tv_sec - st->tv_sec) * 1000000000 + (tv->tv_usec - st->tv_usec);
+	time = (tv->tv_sec - st->tv_sec) * 1000 +
+(tv->tv_usec - st->tv_usec) * 0.001;
 	temp = time * 10;
 	while (temp /= 10)
 		size_nb++;
@@ -101,9 +102,9 @@ int		logs(struct timeval *st, struct timeval *tv, size_t number, char *msg)
 	ptr = log;
 	fill_nbr((size_t)time, &ptr);
 	fill_msg("ms ", &ptr);
-	fill_nbr(size_nb, &ptr);
-	*ptr++ = ' ';
+	fill_nbr(number, &ptr);
 	fill_msg(msg, &ptr);
+	*ptr = '\0';
 	write(STDIN_FILENO, log, size_nb);
 	free(log);
 	return (0);
