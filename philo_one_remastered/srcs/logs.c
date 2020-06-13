@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/09 00:03:02 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/12 00:13:54 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/06/14 00:38:08 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,8 +78,6 @@ int		throw_error(char *prg_name, int error)
 ** "timestamp_in_ms number msg"
 */
 
-#include <stdio.h>
-
 int		logs(struct timeval *st, struct timeval *tv, size_t number, char *msg)
 {
 	char		*ptr;
@@ -94,7 +92,7 @@ int		logs(struct timeval *st, struct timeval *tv, size_t number, char *msg)
 		size_nb++;
 	time = (tv->tv_sec - st->tv_sec) * 1000 +
 (tv->tv_usec - st->tv_usec) * 0.001;
-	temp = time * 10;
+	temp = time;
 	while (temp /= 10)
 		size_nb++;
 	if (!(log = malloc(sizeof(char) * (size_nb))))
@@ -104,8 +102,7 @@ int		logs(struct timeval *st, struct timeval *tv, size_t number, char *msg)
 	fill_msg("ms ", &ptr);
 	fill_nbr(number, &ptr);
 	fill_msg(msg, &ptr);
-	*ptr = '\0';
-	write(STDIN_FILENO, log, size_nb);
+	write(STDOUT_FILENO, log, size_nb);
 	free(log);
 	return (0);
 }
