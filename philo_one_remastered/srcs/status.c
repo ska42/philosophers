@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/09 03:18:32 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/13 21:44:31 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/06/13 21:49:40 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,6 @@
 ** action of eat
 */
 
-#include <stdio.h>
 void		eating(t_philosopher *phi)
 {	
 	gettimeofday(phi->time_last_meal, NULL);
@@ -96,10 +95,24 @@ void		alive(t_philosopher *phi)
 	{
 		pthread_mutex_lock(phi->left_fork);
 		gettimeofday(&time_action, NULL);
+		pthread_mutex_lock(phi->lock_last_meal);
+		if (!phi->time_last_meal)
+		{
+			pthread_mutex_unlock(phi->lock_last_meal);
+			return ;
+		}
+		pthread_mutex_unlock(phi->lock_last_meal);
 		logs(phi->parameters->time_start, &time_action, phi->nb,
 " has taken a left fork /!\\ delete side later\n");
 		pthread_mutex_lock(phi->right_fork);
 		gettimeofday(&time_action, NULL);
+		pthread_mutex_lock(phi->lock_last_meal);
+		if (!phi->time_last_meal)
+		{
+			pthread_mutex_unlock(phi->lock_last_meal);
+			return ;
+		}
+		pthread_mutex_unlock(phi->lock_last_meal);
 		logs(phi->parameters->time_start, &time_action, phi->nb,
 " has taken a right fork /!\\ delete side later\n");
 		if (check_eating(phi))
