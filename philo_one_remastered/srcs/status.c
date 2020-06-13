@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/09 03:18:32 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/13 21:49:40 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/06/13 23:35:10 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,6 +74,49 @@ phi->time_last_meal->tv_usec) * 0.001 > phi->parameters->time_to_die))
 }
 
 /*
+** function: {taking_forks}
+**
+** parameters:
+** (t_philosopher *){phi} - philosopher's structure
+**
+** return (int) - return no-null if a philosopher has died during process
+**
+** description:
+** each philosophers must take 2 forks before eating. To avoid every
+** philosophers to take the left or right fork at the same time and keep
+** everyone safe of a blocked situation, just giving the first and second time,
+** the right or left fork depending if the philosopher is odd or even.
+** 
+*/
+
+int			taking_forks(t_philosopher *phi)
+{
+	int				i;
+	struct timeval	time_action;
+	pthread_mutex_t	*fork;
+
+	i = 0;
+	while (i++ < 2)
+	{	
+		fork = phi->left_fork;
+		if ((phi->nb + i) % 2)
+			fork = phi->right_fork;
+		pthread_mutex_lock(fork);
+		gettimeofday(&time_action, NULL);
+		pthread_mutex_lock(phi->lock_last_meal);
+		if (!phi->time_last_meal)
+		{
+			pthread_mutex_unlock(phi->lock_last_meal);
+			return (1);
+		}
+		pthread_mutex_unlock(phi->lock_last_meal);
+		logs(phi->parameters->time_start, &time_action, phi->nb,
+" has taken a fork\n");
+	}
+	return (0);
+}
+
+/*
 ** function: {alive}
 **
 ** parameters:
@@ -93,28 +136,8 @@ void		alive(t_philosopher *phi)
 
 	while (1)
 	{
-		pthread_mutex_lock(phi->left_fork);
-		gettimeofday(&time_action, NULL);
-		pthread_mutex_lock(phi->lock_last_meal);
-		if (!phi->time_last_meal)
-		{
-			pthread_mutex_unlock(phi->lock_last_meal);
+		if (taking_forks(phi))
 			return ;
-		}
-		pthread_mutex_unlock(phi->lock_last_meal);
-		logs(phi->parameters->time_start, &time_action, phi->nb,
-" has taken a left fork /!\\ delete side later\n");
-		pthread_mutex_lock(phi->right_fork);
-		gettimeofday(&time_action, NULL);
-		pthread_mutex_lock(phi->lock_last_meal);
-		if (!phi->time_last_meal)
-		{
-			pthread_mutex_unlock(phi->lock_last_meal);
-			return ;
-		}
-		pthread_mutex_unlock(phi->lock_last_meal);
-		logs(phi->parameters->time_start, &time_action, phi->nb,
-" has taken a right fork /!\\ delete side later\n");
 		if (check_eating(phi))
 		{	
 			pthread_mutex_unlock(phi->right_fork);
