@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/09 00:07:09 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/12 00:10:49 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/06/12 04:06:18 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ t_parameters	*copy_parameters(t_parameters *parameters)
 
 	if (!(copy = malloc(sizeof(t_parameters))))
 		return (NULL);
-	copy->number_of_philosopher = parameters->number_of_philosopher;
+	copy->number_of_philosophers = parameters->number_of_philosophers;
 	copy->time_to_die = parameters->time_to_die;
 	copy->time_to_eat = parameters->time_to_eat;
 	copy->time_to_sleep = parameters->time_to_sleep;

@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/09 00:07:02 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/12 02:26:51 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/06/13 21:27:59 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,10 @@ void	wait_philosophers(t_philo_one *phi)
 		pthread_mutex_lock(ptr->lock_last_meal);
 		if (!ptr->time_last_meal &&
 (int) ptr->nb_eat != phi->parameters->number_of_time_each_philosophers_must_eat)
+		{
+			pthread_mutex_unlock(ptr->lock_last_meal);
 			break;
+		}
 		if ((int)ptr->nb_eat !=
 phi->parameters->number_of_time_each_philosophers_must_eat && !ptr->next)
 		{
@@ -53,26 +56,18 @@ phi->parameters->number_of_time_each_philosophers_must_eat && !ptr->next)
 	count = 0;
 	while (count < phi->parameters->number_of_philosophers)
 	{
-		printf("start\n");
-		printf("ptr nb %zu\n", ptr->nb);
 		pthread_mutex_lock(ptr->lock_last_meal);
-		printf("ptr nb %zu\n", ptr->nb);
 		if (!ptr->time_last_meal)
 			count++;
 		ptr->time_last_meal = NULL;
 		pthread_mutex_unlock(ptr->lock_last_meal);
-		printf("count: %d\n", count);
 		ptr = ptr->next;
 		if (!ptr && count != phi->parameters->number_of_philosophers)
 		{
-			printf("nosegfault\n");
-			exit(0);
 			count = 0;
 			ptr = phi->philosophers;
 		}
-		printf("AH\n");
 	}
-	printf("end\n");
 }
 
 /*

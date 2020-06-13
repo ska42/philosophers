@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/09 03:18:32 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/12 02:02:07 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/06/13 21:44:31 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,14 +26,12 @@
 
 #include <stdio.h>
 void		eating(t_philosopher *phi)
-{
-	phi->nb_eat++;
-	pthread_mutex_unlock(phi->lock_last_meal);
-	usleep(phi->parameters->time_to_eat * 1000);
-	pthread_mutex_lock(phi->lock_last_meal);
+{	
 	gettimeofday(phi->time_last_meal, NULL);
 	logs(phi->parameters->time_start, phi->time_last_meal,
 phi->nb, " is eating\n");
+	usleep(phi->parameters->time_to_eat * 1000);
+	phi->nb_eat++;
 }
 
 /*
@@ -73,8 +71,6 @@ phi->time_last_meal->tv_usec) * 0.001 > phi->parameters->time_to_die))
 	}
 	eating(phi);
 	pthread_mutex_unlock(phi->lock_last_meal);
-	pthread_mutex_unlock(phi->right_fork);
-	pthread_mutex_unlock(phi->left_fork);
 	return (0);
 }
 
@@ -98,25 +94,29 @@ void		alive(t_philosopher *phi)
 
 	while (1)
 	{
-		gettimeofday(&time_action, NULL);
-		logs(phi->parameters->time_start,
-&time_action, phi->nb, " is thinking\n");
 		pthread_mutex_lock(phi->left_fork);
+		gettimeofday(&time_action, NULL);
 		logs(phi->parameters->time_start, &time_action, phi->nb,
 " has taken a left fork /!\\ delete side later\n");
 		pthread_mutex_lock(phi->right_fork);
+		gettimeofday(&time_action, NULL);
 		logs(phi->parameters->time_start, &time_action, phi->nb,
 " has taken a right fork /!\\ delete side later\n");
 		if (check_eating(phi))
-		{
+		{	
 			pthread_mutex_unlock(phi->right_fork);
 			pthread_mutex_unlock(phi->left_fork);
 			return ;
 		}
+		pthread_mutex_unlock(phi->right_fork);
+		pthread_mutex_unlock(phi->left_fork);
 		gettimeofday(&time_action, NULL);
 		logs(phi->parameters->time_start,
 &time_action, phi->nb, " is sleeping\n");
 		usleep(phi->parameters->time_to_sleep * 1000);
+		gettimeofday(&time_action, NULL);
+		logs(phi->parameters->time_start,
+&time_action, phi->nb, " is thinking\n");
 	}
 }
 
