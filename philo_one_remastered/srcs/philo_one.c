@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/09 00:07:02 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/13 21:27:59 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/06/14 03:33:46 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,49 +24,32 @@
 ** wait for a philosopher to finish, then kill all if one has died.
 */
 
-#include <stdio.h>
 void	wait_philosophers(t_philo_one *phi)
 {
-	t_philosopher	*ptr;
 	int				count;
+	t_philosopher	*ptr;
 
 	ptr = phi->philosophers;
-	while (ptr)
+	while (!(count = 0) && ptr && !pthread_mutex_lock(ptr->lock_last_meal))
 	{
-		pthread_mutex_lock(ptr->lock_last_meal);
 		if (!ptr->time_last_meal &&
-(int) ptr->nb_eat != phi->parameters->number_of_time_each_philosophers_must_eat)
-		{
-			pthread_mutex_unlock(ptr->lock_last_meal);
-			break;
-		}
-		if ((int)ptr->nb_eat !=
-phi->parameters->number_of_time_each_philosophers_must_eat && !ptr->next)
-		{
-			pthread_mutex_unlock(ptr->lock_last_meal);
-			ptr = phi->philosophers;
-		}
-		else
-		{
-			pthread_mutex_unlock(ptr->lock_last_meal);
-			ptr = ptr->next;
-		}
+(int)ptr->nb_eat != phi->parameters->number_of_time_each_philosophers_must_eat
+	&& !pthread_mutex_unlock(ptr->lock_last_meal))
+			break ;
+		else if ((int)ptr->nb_eat !=
+phi->parameters->number_of_time_each_philosophers_must_eat && !ptr->next &&
+!pthread_mutex_unlock(ptr->lock_last_meal) && (ptr = phi->philosophers))
+			continue ;
+		ptr = (!pthread_mutex_unlock(ptr->lock_last_meal)) ? ptr->next : ptr;
 	}
 	ptr = phi->philosophers;
-	count = 0;
-	while (count < phi->parameters->number_of_philosophers)
+	while (count < phi->parameters->number_of_philosophers &&
+!pthread_mutex_lock(ptr->lock_last_meal))
 	{
-		pthread_mutex_lock(ptr->lock_last_meal);
-		if (!ptr->time_last_meal)
-			count++;
-		ptr->time_last_meal = NULL;
-		pthread_mutex_unlock(ptr->lock_last_meal);
-		ptr = ptr->next;
+		count += (!ptr->time_last_meal) ? !(ptr->time_last_meal = NULL) + 1 : 0;
+		ptr = (!pthread_mutex_unlock(ptr->lock_last_meal)) ? ptr->next : ptr;
 		if (!ptr && count != phi->parameters->number_of_philosophers)
-		{
-			count = 0;
-			ptr = phi->philosophers;
-		}
+			ptr = !(count *= 0) ? phi->philosophers : ptr;
 	}
 }
 
@@ -79,7 +62,7 @@ phi->parameters->number_of_time_each_philosophers_must_eat && !ptr->next)
 ** return (int): error's code
 **
 ** description:
-** allocate and setup the lock on last_meal and 
+** allocate and setup the lock on last_meal and
 ** launch all pthread on philosophers then call {wait_philosophers}
 */
 
@@ -103,7 +86,7 @@ int		launch_philosophers(t_philo_one *phi)
 			return (ERROR_MALLOC);
 		if (pthread_mutex_init(ptr->lock_last_meal, NULL))
 			return (ERROR_MUTEX);
-		if (pthread_create(ptr->thread, NULL, &init_life, ptr))
+		if (pthread_create(ptr->thread, NULL, &alive, ptr))
 			return (ERROR_PTHREAD);
 		ptr = ptr->next;
 	}
@@ -127,26 +110,23 @@ int		init_philosophers(t_philo_one *phi)
 {
 	int				i;
 	t_philosopher	*ptr;
-	pthread_mutex_t	*right_fork;
+	pthread_mutex_t	*r_fork;
 
 	if (!(phi->philosophers = malloc(sizeof(t_philosopher))) ||
-(!(right_fork = malloc(sizeof(pthread_mutex_t)))))
+(!(r_fork = malloc(sizeof(pthread_mutex_t)))))
 		return (ERROR_MALLOC);
-	if (pthread_mutex_init(right_fork, NULL))
+	if (!(i = 0) && pthread_mutex_init(r_fork, NULL))
 		return (ERROR_MUTEX);
 	ptr = phi->philosophers;
-	i = 0;
-	while (i < phi->parameters->number_of_philosophers && ptr && (ptr->nb = ++i))
+	while (ptr && (ptr->nb = i + 1) &&
+i++ < phi->parameters->number_of_philosophers && (ptr->left_fork = r_fork))
 	{
 		if (!(ptr->thread = malloc(sizeof(pthread_t))))
 			return (ERROR_MALLOC);
-		ptr->left_fork = right_fork;
 		ptr->right_fork = (i == phi->parameters->number_of_philosophers) ?
 phi->philosophers->left_fork : malloc(sizeof(pthread_mutex_t));
-		if (!(right_fork = ptr->right_fork))
-			return (ERROR_MALLOC);
-		if (pthread_mutex_init(right_fork, NULL))
-			return (ERROR_MUTEX);
+		if (!(r_fork = ptr->right_fork) || pthread_mutex_init(r_fork, NULL))
+			return ((!r_fork) ? ERROR_MALLOC : ERROR_MUTEX);
 		if (i != phi->parameters->number_of_philosophers &&
 !(ptr->next = malloc(sizeof(t_philosopher))))
 			return (ERROR_MALLOC);
@@ -191,7 +171,8 @@ int		init_args(int argc, char *argv[], t_philo_one *phi)
 	else if (argc == 5)
 		phi->parameters->number_of_time_each_philosophers_must_eat = -1;
 	return (0);
-} 
+}
+
 /*
 ** PHILO_ONE
 **

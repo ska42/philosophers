@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/09 03:18:32 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/14 00:24:31 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/06/14 02:58:21 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@
 */
 
 void		eating(t_philosopher *phi)
-{	
+{
 	gettimeofday(phi->time_last_meal, NULL);
 	logs(phi->parameters->time_start, phi->time_last_meal,
 phi->nb, " is eating\n");
@@ -86,7 +86,6 @@ phi->time_last_meal->tv_usec) * 0.001 > phi->parameters->time_to_die))
 ** philosophers to take the left or right fork at the same time and keep
 ** everyone safe of a blocked situation, just giving the first and second time,
 ** the right or left fork depending if the philosopher is odd or even.
-** 
 */
 
 int			taking_forks(t_philosopher *phi)
@@ -97,12 +96,11 @@ int			taking_forks(t_philosopher *phi)
 
 	i = 0;
 	while (i++ < 2)
-	{	
+	{
 		fork = phi->left_fork;
 		if ((phi->nb + i) % 2)
 			fork = phi->right_fork;
 		pthread_mutex_lock(fork);
-		gettimeofday(&time_action, NULL);
 		pthread_mutex_lock(phi->lock_last_meal);
 		if (!phi->time_last_meal)
 		{
@@ -110,6 +108,7 @@ int			taking_forks(t_philosopher *phi)
 			return (1);
 		}
 		pthread_mutex_unlock(phi->lock_last_meal);
+		gettimeofday(&time_action, NULL);
 		logs(phi->parameters->time_start, &time_action, phi->nb,
 " has taken a fork\n");
 	}
@@ -120,9 +119,9 @@ int			taking_forks(t_philosopher *phi)
 ** function: {alive}
 **
 ** parameters:
-** (t_philosopher *){phi} - philosopher's structure
+** (void *){args} - contain philosopher's structure
 **
-** return (void) - just exiting if the philosopher is dead
+** return (void *) - just exiting if the philosopher is dead
 **
 ** description:
 ** thinking - eating - spleeping on a loop with timer, it call {eating} when
@@ -130,19 +129,21 @@ int			taking_forks(t_philosopher *phi)
 ** philosopher died so it exit the function resulting of a kill of the pthread.
 */
 
-void		alive(t_philosopher *phi)
+void		*alive(void *args)
 {
+	t_philosopher	*phi;
 	struct timeval	time_action;
 
+	phi = (t_philosopher *)args;
 	while (1)
 	{
 		if (taking_forks(phi))
-			return ;
+			return (NULL);
 		if (check_eating(phi))
-		{	
+		{
 			pthread_mutex_unlock(phi->right_fork);
 			pthread_mutex_unlock(phi->left_fork);
-			return ;
+			return (NULL);
 		}
 		pthread_mutex_unlock(phi->right_fork);
 		pthread_mutex_unlock(phi->left_fork);
@@ -154,29 +155,5 @@ void		alive(t_philosopher *phi)
 		logs(phi->parameters->time_start,
 &time_action, phi->nb, " is thinking\n");
 	}
-}
-
-/*
-** function: {init_life}
-**
-** parameters:
-** (void *){args} - contain philosopher's structure
-**
-** return (void)
-**
-** description:
-** init {start} to pass it through {alive} function to avoid multiple call at
-** {time_start} and avoid mutex lock/unlock, init also time_last_meal with the
-** starting time.
-*/
-
-
-void		*init_life(void *args)
-{
-	t_philosopher	*phi;
-
-	phi = (t_philosopher *)args;
-
-	alive(phi);
 	return (NULL);
 }

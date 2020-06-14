@@ -6,13 +6,13 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/09 04:09:06 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/11 23:29:14 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/06/14 02:59:00 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef STATUS_H
 # define STATUS_H
 
-void	*init_life(void *args);
+void		*alive(void *args);
 
 #endif
