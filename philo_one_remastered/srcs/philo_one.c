@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/09 00:07:02 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/14 03:33:46 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/06/16 02:32:59 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,30 +26,30 @@
 
 void	wait_philosophers(t_philo_one *phi)
 {
-	int				count;
+	int				c;
 	t_philosopher	*ptr;
 
 	ptr = phi->philosophers;
-	while (!(count = 0) && ptr && !pthread_mutex_lock(ptr->lock_last_meal))
+	while (!(c = 0) && ptr && !pthread_mutex_lock(ptr->lock_last_meal))
 	{
 		if (!ptr->time_last_meal &&
-(int)ptr->nb_eat != phi->parameters->number_of_time_each_philosophers_must_eat
+ptr->nb_eat != phi->parameters->number_of_time_each_philosophers_must_eat
 	&& !pthread_mutex_unlock(ptr->lock_last_meal))
 			break ;
-		else if ((int)ptr->nb_eat !=
+		else if (ptr->nb_eat !=
 phi->parameters->number_of_time_each_philosophers_must_eat && !ptr->next &&
 !pthread_mutex_unlock(ptr->lock_last_meal) && (ptr = phi->philosophers))
 			continue ;
 		ptr = (!pthread_mutex_unlock(ptr->lock_last_meal)) ? ptr->next : ptr;
 	}
 	ptr = phi->philosophers;
-	while (count < phi->parameters->number_of_philosophers &&
+	while (c < phi->parameters->number_of_philosophers &&
 !pthread_mutex_lock(ptr->lock_last_meal))
 	{
-		count += (!ptr->time_last_meal) ? !(ptr->time_last_meal = NULL) + 1 : 0;
+		c += (!ptr->time_last_meal) ? 1 : !!(ptr->time_last_meal = NULL) + 0;
 		ptr = (!pthread_mutex_unlock(ptr->lock_last_meal)) ? ptr->next : ptr;
-		if (!ptr && count != phi->parameters->number_of_philosophers)
-			ptr = !(count *= 0) ? phi->philosophers : ptr;
+		if (!ptr && c != phi->parameters->number_of_philosophers)
+			ptr = !(c *= 0) ? phi->philosophers : ptr;
 	}
 }
 
@@ -74,8 +74,9 @@ int		launch_philosophers(t_philo_one *phi)
 		return (ERROR_MALLOC);
 	gettimeofday(phi->parameters->time_start, NULL);
 	ptr = phi->philosophers;
-	while (ptr)
+	while (ptr && !(ptr->left_fork->nb_last = 0))
 	{
+		ptr->right_fork->nb_last = 0;
 		if (!(ptr->time_last_meal = malloc(sizeof(struct timeval))))
 			return (ERROR_MALLOC);
 		ptr->time_last_meal->tv_sec = phi->parameters->time_start->tv_sec;
@@ -110,12 +111,13 @@ int		init_philosophers(t_philo_one *phi)
 {
 	int				i;
 	t_philosopher	*ptr;
-	pthread_mutex_t	*r_fork;
+	t_fork			*r_fork;
 
 	if (!(phi->philosophers = malloc(sizeof(t_philosopher))) ||
-(!(r_fork = malloc(sizeof(pthread_mutex_t)))))
+!(r_fork = malloc(sizeof(t_fork))) ||
+!(r_fork->fork = malloc(sizeof(pthread_mutex_t))))
 		return (ERROR_MALLOC);
-	if (!(i = 0) && pthread_mutex_init(r_fork, NULL))
+	if (!(i = 0) && pthread_mutex_init(r_fork->fork, NULL))
 		return (ERROR_MUTEX);
 	ptr = phi->philosophers;
 	while (ptr && (ptr->nb = i + 1) &&
@@ -123,9 +125,14 @@ i++ < phi->parameters->number_of_philosophers && (ptr->left_fork = r_fork))
 	{
 		if (!(ptr->thread = malloc(sizeof(pthread_t))))
 			return (ERROR_MALLOC);
-		ptr->right_fork = (i == phi->parameters->number_of_philosophers) ?
-phi->philosophers->left_fork : malloc(sizeof(pthread_mutex_t));
-		if (!(r_fork = ptr->right_fork) || pthread_mutex_init(r_fork, NULL))
+		if (i == phi->parameters->number_of_philosophers)
+			ptr->right_fork = phi->philosophers->left_fork;
+		else
+		{
+			ptr->right_fork = malloc(sizeof(t_fork));
+			ptr->right_fork->fork = malloc(sizeof(pthread_mutex_t));
+		}
+		if (!(r_fork = ptr->right_fork) || pthread_mutex_init(r_fork->fork, NULL))
 			return ((!r_fork) ? ERROR_MALLOC : ERROR_MUTEX);
 		if (i != phi->parameters->number_of_philosophers &&
 !(ptr->next = malloc(sizeof(t_philosopher))))
@@ -174,6 +181,48 @@ int		init_args(int argc, char *argv[], t_philo_one *phi)
 }
 
 /*
+** function {unmake_pairs}
+**
+** parameters:
+** (t_philo_one *){phi} - philosopher's structure
+**
+** return (void)
+**
+** description:
+** sort the philosophers by odd or even to avoid invoking 2 philosopher close to
+** each other & avoid death that shouldn't happen.
+*/
+
+void	unmake_pairs(t_philo_one	*phi)
+{
+	t_philosopher	*temp;
+	t_philosopher	*ptr;
+	t_philosopher	*odd;
+	t_philosopher	*even;
+	
+	ptr = phi->philosophers;
+	odd = phi->philosophers;
+	temp = phi->philosophers->next;
+	even = phi->philosophers->next;
+	while (ptr)
+	{
+		if (ptr->nb % 2 && ptr->nb != 1)
+		{
+			odd->next = ptr;
+			odd = odd->next;
+		}
+		else if (!(ptr->nb % 2) && ptr->nb != 2)
+		{
+			even->next = ptr;
+			even = even->next;
+		}
+		ptr = ptr->next;
+	}
+	odd->next = temp;
+	even->next = NULL;
+}
+
+/*
 ** PHILO_ONE
 **
 ** description:
@@ -197,6 +246,9 @@ int		main(int argc, char *argv[])
 		return (throw_error(phi.name, ret));
 	if ((ret = init_philosophers(&phi)))
 		return (throw_error(phi.name, ret));
+	// TESTING
+	unmake_pairs(&phi);
+	//
 	if ((ret = launch_philosophers(&phi)))
 		return (throw_error(phi.name, ret));
 }

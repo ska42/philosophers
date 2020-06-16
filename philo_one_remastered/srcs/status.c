@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/09 03:18:32 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/14 02:58:21 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/06/16 02:31:53 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,8 +29,8 @@ void		eating(t_philosopher *phi)
 	gettimeofday(phi->time_last_meal, NULL);
 	logs(phi->parameters->time_start, phi->time_last_meal,
 phi->nb, " is eating\n");
-	usleep(phi->parameters->time_to_eat * 1000);
 	phi->nb_eat++;
+	usleep(phi->parameters->time_to_eat * 1000);
 }
 
 /*
@@ -52,13 +52,14 @@ int			check_eating(t_philosopher *phi)
 
 	gettimeofday(&time_action, NULL);
 	pthread_mutex_lock(phi->lock_last_meal);
-	if ((int)phi->nb_eat ==
+	if (phi->nb_eat ==
 phi->parameters->number_of_time_each_philosophers_must_eat ||
-!phi->time_last_meal || ((time_action.tv_sec -
+!phi->time_last_meal || ((size_t)((time_action.tv_sec -
 phi->time_last_meal->tv_sec) * 1000 + (time_action.tv_usec -
-phi->time_last_meal->tv_usec) * 0.001 > phi->parameters->time_to_die))
+phi->time_last_meal->tv_usec) * 0.001) > phi->parameters->time_to_die))
 	{
-		if (phi->time_last_meal)
+		if (phi->time_last_meal && phi->nb_eat !=
+phi->parameters->number_of_time_each_philosophers_must_eat)
 		{
 			free(phi->time_last_meal);
 			logs(phi->parameters->time_start,
@@ -91,27 +92,26 @@ phi->time_last_meal->tv_usec) * 0.001 > phi->parameters->time_to_die))
 int			taking_forks(t_philosopher *phi)
 {
 	int				i;
+	t_fork			*fork;
 	struct timeval	time_action;
-	pthread_mutex_t	*fork;
 
 	i = 0;
-	while (i++ < 2)
+	fork = ((phi->nb + i) % 2) ? phi->left_fork : phi->right_fork;
+	while (i < 2)
 	{
-		fork = phi->left_fork;
-		if ((phi->nb + i) % 2)
-			fork = phi->right_fork;
-		pthread_mutex_lock(fork);
-		pthread_mutex_lock(phi->lock_last_meal);
-		if (!phi->time_last_meal)
+		if (fork->nb_last != phi->nb)
 		{
-			pthread_mutex_unlock(phi->lock_last_meal);
-			return (1);
-		}
-		pthread_mutex_unlock(phi->lock_last_meal);
-		gettimeofday(&time_action, NULL);
-		logs(phi->parameters->time_start, &time_action, phi->nb,
+			pthread_mutex_lock(fork->fork);
+			gettimeofday(&time_action, NULL);
+			logs(phi->parameters->time_start, &time_action, phi->nb,
 " has taken a fork\n");
+			fork->nb_last = phi->nb;
+			if (++i != 2)
+				fork = ((phi->nb + i) % 2) ? phi->left_fork : phi->right_fork;
+		}
 	}
+	if (!phi->time_last_meal)
+		return (1);
 	return (0);
 }
 
@@ -141,12 +141,12 @@ void		*alive(void *args)
 			return (NULL);
 		if (check_eating(phi))
 		{
-			pthread_mutex_unlock(phi->right_fork);
-			pthread_mutex_unlock(phi->left_fork);
+			pthread_mutex_unlock(phi->right_fork->fork);
+			pthread_mutex_unlock(phi->left_fork->fork);
 			return (NULL);
 		}
-		pthread_mutex_unlock(phi->right_fork);
-		pthread_mutex_unlock(phi->left_fork);
+		pthread_mutex_unlock(phi->right_fork->fork);
+		pthread_mutex_unlock(phi->left_fork->fork);
 		gettimeofday(&time_action, NULL);
 		logs(phi->parameters->time_start,
 &time_action, phi->nb, " is sleeping\n");
