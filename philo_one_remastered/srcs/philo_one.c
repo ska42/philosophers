@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/09 00:07:02 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/16 02:32:59 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/06/16 03:14:28 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,6 +96,40 @@ int		launch_philosophers(t_philo_one *phi)
 }
 
 /*
+** function: {setup_philosopher}
+**
+** parameters:
+** (t_philo_one *){phi} - program's structure,
+** (int){i} - iterator of while in {init_philosophers},
+** (t_philosopher **){ptr} - a pointer to a philosopher,
+** (t_fork **){r_fork} - a pointer to a fork
+**
+** return (int): error's code
+**
+** description:
+** setup a philosopher (splited version of {init_philosophers})
+*/
+
+int		setup_philosopher(t_philo_one *phi, int i, t_philosopher **ptr,
+t_fork **r_fork)
+{
+	if (!((*ptr)->thread = malloc(sizeof(pthread_t))))
+		return (ERROR_MALLOC);
+	(*ptr)->right_fork = (i == phi->parameters->number_of_philosophers) ?
+phi->philosophers->left_fork : malloc(sizeof(t_fork));
+	if (!((*r_fork) = (*ptr)->right_fork) ||
+((i != phi->parameters->number_of_philosophers) &&
+!((*ptr)->right_fork->fork = malloc(sizeof(pthread_mutex_t)))))
+		return (ERROR_MALLOC);
+	if (pthread_mutex_init((*r_fork)->fork, NULL))
+		return (ERROR_MUTEX);
+	if (i != phi->parameters->number_of_philosophers &&
+!((*ptr)->next = malloc(sizeof(t_philosopher))))
+		return (ERROR_MALLOC);
+	return (0);
+}
+
+/*
 ** function: {init_philosophers}
 **
 ** parameters:
@@ -109,6 +143,7 @@ int		launch_philosophers(t_philo_one *phi)
 
 int		init_philosophers(t_philo_one *phi)
 {
+	int				ret;
 	int				i;
 	t_philosopher	*ptr;
 	t_fork			*r_fork;
@@ -123,20 +158,8 @@ int		init_philosophers(t_philo_one *phi)
 	while (ptr && (ptr->nb = i + 1) &&
 i++ < phi->parameters->number_of_philosophers && (ptr->left_fork = r_fork))
 	{
-		if (!(ptr->thread = malloc(sizeof(pthread_t))))
-			return (ERROR_MALLOC);
-		if (i == phi->parameters->number_of_philosophers)
-			ptr->right_fork = phi->philosophers->left_fork;
-		else
-		{
-			ptr->right_fork = malloc(sizeof(t_fork));
-			ptr->right_fork->fork = malloc(sizeof(pthread_mutex_t));
-		}
-		if (!(r_fork = ptr->right_fork) || pthread_mutex_init(r_fork->fork, NULL))
-			return ((!r_fork) ? ERROR_MALLOC : ERROR_MUTEX);
-		if (i != phi->parameters->number_of_philosophers &&
-!(ptr->next = malloc(sizeof(t_philosopher))))
-			return (ERROR_MALLOC);
+		if ((ret = setup_philosopher(phi, i, &ptr, &r_fork)))
+			return (ret);
 		ptr = ptr->next;
 	}
 	return (0);
@@ -193,13 +216,13 @@ int		init_args(int argc, char *argv[], t_philo_one *phi)
 ** each other & avoid death that shouldn't happen.
 */
 
-void	unmake_pairs(t_philo_one	*phi)
+void	unmake_pairs(t_philo_one *phi)
 {
 	t_philosopher	*temp;
 	t_philosopher	*ptr;
 	t_philosopher	*odd;
 	t_philosopher	*even;
-	
+
 	ptr = phi->philosophers;
 	odd = phi->philosophers;
 	temp = phi->philosophers->next;
@@ -246,9 +269,7 @@ int		main(int argc, char *argv[])
 		return (throw_error(phi.name, ret));
 	if ((ret = init_philosophers(&phi)))
 		return (throw_error(phi.name, ret));
-	// TESTING
 	unmake_pairs(&phi);
-	//
 	if ((ret = launch_philosophers(&phi)))
 		return (throw_error(phi.name, ret));
 }
