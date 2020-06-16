@@ -6,7 +6,7 @@
 #    By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/12/19 23:21:49 by lmartin           #+#    #+#              #
-#    Updated: 2020/06/09 03:18:56 by lmartin          ###   ########.fr        #
+#    Updated: 2020/06/16 19:08:44 by lmartin          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -70,6 +70,7 @@ DIR_OBJS	=	./compiled_srcs/
 SRC			=	logs.c \
 				utils.c \
 				philo_one.c \
+				philosophers.c \
 				status.c
 
 SRCS		=	$(SRC)
