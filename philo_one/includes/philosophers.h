@@ -5,60 +5,54 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2019/12/19 22:52:03 by lmartin           #+#    #+#             */
-/*   Updated: 2020/03/10 23:07:16 by lmartin          ###   ########.fr       */
+/*   Created: 2020/06/16 19:02:17 by lmartin           #+#    #+#             */
+/*   Updated: 2020/06/16 19:10:54 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PHILOSOPHERS_H
 # define PHILOSOPHERS_H
 
-# include <stdlib.h>
-# include <unistd.h>
-# include <sys/time.h>
-# include <pthread.h>
-# include <string.h>
-
-# include "action.h"
-# include "errors.h"
-# include "utils.h"
-# include "forks.h"
-# include "logs.h"
-
 typedef struct		s_parameters
 {
-	size_t			number_of_philosopher;
+	int				number_of_philosophers;
 	size_t			time_to_die;
 	size_t			time_to_eat;
 	size_t			time_to_sleep;
 	size_t			number_of_time_each_philosophers_must_eat;
+	struct timeval	*time_start;
 }					t_parameters;
+
+typedef struct		s_fork
+{
+	pthread_mutex_t	*fork;
+	size_t			nb_last;
+}					t_fork;
 
 typedef struct		s_philosopher
 {
-	size_t			number;
+	size_t			nb;
+	size_t			nb_eat;
 	t_parameters	*parameters;
-	t_lstforks		*left_fork;
-	t_lstforks		*right_fork;
-	struct timeval	*last_meal;
-	pthread_mutex_t	*lock_last_meal;
-	void			*next;	
+	pthread_t		*thread;
+	t_fork			*left_fork;
+	t_fork			*right_fork;
+	pthread_mutex_t *lock_last_meal;
+	struct timeval	*time_last_meal;
+	void			*next;
 }					t_philosopher;
 
-typedef struct		s_program
+typedef struct		s_philo_one
 {
 	char			*name;
 	t_parameters	*parameters;
-	pthread_t		*philosophers;
-	t_lstforks		*forks;
-}					t_program;
+	t_philosopher	*philosophers;
+}					t_philo_one;
 
-
-int					check_die(t_philosopher *philosophers, t_program *phi);
-int					launch_philosophers(t_philosopher *philosophers,
-t_program *phi);
-int					init_philosophers(t_program *phi);
-t_philosopher		*new_philosopher(size_t number, t_lstforks *left_fork,
-t_lstforks			*right_fork, t_parameters *parameters);
+void				unmake_pairs(t_philo_one *phi);
+int					launch_philosophers(t_philo_one *phi);
+int					setup_philosopher(t_philo_one *phi, int i,
+t_philosopher **ptr, t_fork **r_fork);
+int					init_philosophers(t_philo_one *phi);
 
 #endif

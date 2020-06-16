@@ -6,7 +6,7 @@
 #    By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/12/19 23:21:49 by lmartin           #+#    #+#              #
-#    Updated: 2020/03/10 23:05:31 by lmartin          ###   ########.fr        #
+#    Updated: 2020/06/16 19:08:44 by lmartin          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -67,14 +67,11 @@ DIR_OBJS	=	./compiled_srcs/
 
 # FILES #
 
-SRC			=	errors.c \
-				forks.c \
-				ft_atos.c \
-				ft_strlen.c \
-				logs.c \
+SRC			=	logs.c \
+				utils.c \
 				philo_one.c \
-				philosopher.c \
-				action.c
+				philosophers.c \
+				status.c
 
 SRCS		=	$(SRC)
 

@@ -5,77 +5,76 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2019/12/19 22:51:31 by lmartin           #+#    #+#             */
-/*   Updated: 2020/03/10 21:38:57 by lmartin          ###   ########.fr       */
+/*   Created: 2020/06/09 00:07:02 by lmartin           #+#    #+#             */
+/*   Updated: 2020/06/16 19:00:15 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "philosophers.h"
+#include "philo_one.h"
 
 /*
-** Check for arguments (like too few philosophers)
+** function: {init_args}
+**
+** parameters:
+** (int){argc} - number of arguments {argv},
+** (char **){argv} - array of (char *) arguments,
+** (t_philo_one){phi} - pointer to stucture to fill
+**
+** return (int): too many arguments, wrong argument or others...
+**
+** description:
+** init all arguments from {argv}
 */
 
-int			check_args(t_program *phi) // TODO: Check args like nb philosophers or nb_eat
+int		init_args(int argc, char *argv[], t_philo_one *phi)
 {
-	(void)phi;
-	return (0);
-}
-
-/*
-** init program parameters:
-** program number_of_philosopher time_to_die time_to_eattime_to_sleep
-** [number_of_time_each_philosophers_must_eat]
-** and put it in t_program *phi
-*/
-
-int			init_program(t_program *phi, char *argv[])
-{
-	int				ret;
-	size_t			i;
-
-	phi->name = argv[0];
 	if (!(phi->parameters = malloc(sizeof(t_parameters))))
-		return (ERR_MALLOC);
-	if (ft_atos(argv[1], &phi->parameters->number_of_philosopher) < 0)
-		return (ERR_WRONG_ARG);
-	if (ft_atos(argv[2], &phi->parameters->time_to_die) < 0)
-		return (ERR_WRONG_ARG);
-	if (ft_atos(argv[3], &phi->parameters->time_to_eat) < 0)
-		return (ERR_WRONG_ARG);
-	if (ft_atos(argv[4], &phi->parameters->time_to_sleep) < 0)
-		return (ERR_WRONG_ARG);
-	if (ft_atos(argv[5], 
-&phi->parameters->number_of_time_each_philosophers_must_eat) < 0)
-		return (ERR_WRONG_ARG);
-	i = phi->parameters->number_of_philosopher;
-	while (i--)
-		if ((ret = forks_add_back(&phi->forks)) < 0)
-			return (ret);
-	if (!(phi->philosophers = malloc(sizeof(pthread_t) *
-phi->parameters->number_of_philosopher)))
-		return (ERR_MALLOC);
+		return (ERROR_MALLOC);
+	if (argc < 5 || argc > 6)
+		return (TOO_MANY_ARGS);
+	if (ft_atos(argv[1], (size_t *)&phi->parameters->number_of_philosophers))
+		return (WRONG_ARG);
+	if (phi->parameters->number_of_philosophers < 2)
+		return (WRONG_ARG);
+	if ((ft_atos(argv[2], &phi->parameters->time_to_die)))
+		return (WRONG_ARG);
+	if ((ft_atos(argv[3], &phi->parameters->time_to_eat)))
+		return (WRONG_ARG);
+	if ((ft_atos(argv[4], &phi->parameters->time_to_sleep)))
+		return (WRONG_ARG);
+	if (argc == 6 && (ft_atos(argv[5],
+(size_t *)&phi->parameters->number_of_time_each_philosophers_must_eat)))
+		return (WRONG_ARG);
+	else if (argc == 5)
+		phi->parameters->number_of_time_each_philosophers_must_eat = -1;
 	return (0);
 }
 
 /*
-** PHILOSOPHERS PHILO_ONE
+** PHILO_ONE
+**
+** description:
+** philosopher with threads and mutex.
+**
+** special rules:
+** 1. One fork between each philosopher, therefore there will be a fork at the
+** right and at the left of each philosopher.
+** 2. To avoid philosophers duplicating forks, you should protect the forks
+** state with a mutex for each of them.
+** 3. Each philosopher should be a thread.
 */
 
-int			main(int argc, char *argv[])
+int		main(int argc, char *argv[])
 {
 	int				ret;
-	t_program		phi;
+	t_philo_one		phi;
 
-	if (argc != 6)
-		return (throw_error(argv[0], ERR_NB_ARGS));
-	if ((ret = init_program(&phi, argv)) < 0)
+	phi.name = argv[0];
+	if ((ret = init_args(argc, argv, &phi)))
 		return (throw_error(phi.name, ret));
-	if ((ret = check_args(&phi)) < 0)
+	if ((ret = init_philosophers(&phi)))
 		return (throw_error(phi.name, ret));
-	if ((ret = init_locks(&phi.forks)) < 0)
+	unmake_pairs(&phi);
+	if ((ret = launch_philosophers(&phi)))
 		return (throw_error(phi.name, ret));
-	if ((ret = init_philosophers(&phi)) < 0)
-		return (throw_error(phi.name, ret));	
-	// TODO: free and clean
 }

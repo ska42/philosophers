@@ -1,22 +1,19 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   errors.h                                           :+:      :+:    :+:   */
+/*   utils.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2020/06/09 00:07:29 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/09 03:01:28 by lmartin          ###   ########.fr       */
+/*   Created: 2019/12/20 13:44:01 by lmartin           #+#    #+#             */
+/*   Updated: 2019/12/20 13:48:30 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef ERRORS_H
-# define ERRORS_H
+#ifndef UTILS_H
+# define UTILS_H
 
-# define TOO_MANY_ARGS -3
-# define WRONG_ARG -4
-# define ERROR_MALLOC -5
-# define ERROR_MUTEX -6
-# define ERROR_PTHREAD -7
+int		ft_atos(char *str, size_t *nb);
+size_t	ft_strlen(const char *s);
 
 #endif
