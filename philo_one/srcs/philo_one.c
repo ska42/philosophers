@@ -6,11 +6,48 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/09 00:07:02 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/16 19:00:15 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/06/17 12:49:29 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo_one.h"
+
+/*
+** function: {clean_all}
+**
+** parameters:
+** (t_philo_one *){phi} - pointer to the program's structure
+**
+** return (int) - return 0 to permit to call the function on a return
+**
+** description:
+** free all philosophers and parameters
+*/
+
+int		clean_all(t_philo_one *phi)
+{
+	void			*temp;
+	t_philosopher	*ptr;
+
+	ptr = phi->philosophers;
+	while (ptr)
+	{
+		temp = ptr->next;
+		free(ptr->parameters->time_start);
+		free(ptr->parameters);
+		pthread_mutex_destroy(ptr->left_fork->fork);
+		pthread_mutex_destroy(ptr->lock_last_meal);
+		free(ptr->left_fork);
+		free(ptr->lock_last_meal);
+		free(ptr->thread);
+		free(ptr->time_last_meal);
+		free(ptr);
+		ptr = temp;
+	}
+	free(phi->parameters->time_start);
+	free(phi->parameters);
+	return (0);
+}
 
 /*
 ** function: {init_args}
@@ -18,7 +55,7 @@
 ** parameters:
 ** (int){argc} - number of arguments {argv},
 ** (char **){argv} - array of (char *) arguments,
-** (t_philo_one){phi} - pointer to stucture to fill
+** (t_philo_one *){phi} - pointer to stucture to fill
 **
 ** return (int): too many arguments, wrong argument or others...
 **
@@ -71,10 +108,11 @@ int		main(int argc, char *argv[])
 
 	phi.name = argv[0];
 	if ((ret = init_args(argc, argv, &phi)))
-		return (throw_error(phi.name, ret));
+		return (throw_error(phi.name, ret) + clean_all(&phi));
 	if ((ret = init_philosophers(&phi)))
-		return (throw_error(phi.name, ret));
+		return (throw_error(phi.name, ret) + clean_all(&phi));
 	unmake_pairs(&phi);
 	if ((ret = launch_philosophers(&phi)))
-		return (throw_error(phi.name, ret));
+		return (throw_error(phi.name, ret) + clean_all(&phi));
+	clean_all(&phi);
 }
