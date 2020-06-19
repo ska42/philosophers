@@ -6,11 +6,11 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/09 00:03:02 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/14 00:38:08 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/06/19 02:57:04 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "philo_one.h"
+#include "philo_two.h"
 
 /*
 ** function: {msg_error}
@@ -59,6 +59,8 @@ int		throw_error(char *prg_name, int error)
 		msg_error(prg_name, "mutex error");
 	else if (error == ERROR_PTHREAD)
 		msg_error(prg_name, "pthread error");
+	else if (error == ERROR_SEM)
+		msg_error(prg_name, "semaphore error");
 	return (error);
 }
 

@@ -6,11 +6,11 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/09 00:07:09 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/14 00:31:07 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/06/19 02:57:15 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "philo_one.h"
+#include "philo_two.h"
 
 /*
 ** function {copy_parameters}
@@ -37,6 +37,7 @@ t_parameters	*copy_parameters(t_parameters *parameters)
 	copy->time_to_sleep = parameters->time_to_sleep;
 	copy->number_of_time_each_philosophers_must_eat =
 parameters->number_of_time_each_philosophers_must_eat;
+	copy->forks = parameters->forks;
 	if (!(copy->time_start = malloc(sizeof(struct timeval))))
 	{
 		free(copy);

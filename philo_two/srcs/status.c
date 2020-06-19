@@ -6,11 +6,11 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/09 03:18:32 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/19 02:34:33 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/06/19 03:40:31 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "philo_one.h"
+#include "philo_two.h"
 
 /*
 ** function: {eating}
@@ -51,7 +51,8 @@ int			check_eating(t_philosopher *phi)
 	struct timeval	time_action;
 
 	gettimeofday(&time_action, NULL);
-	pthread_mutex_lock(phi->lock_last_meal);
+	if (sem_wait(phi->sem_last_meal)) // TODO: handling error ?
+		return (ERROR_SEM);
 	if (phi->nb_eat ==
 phi->parameters->number_of_time_each_philosophers_must_eat ||
 !phi->time_last_meal || ((size_t)((time_action.tv_sec -
@@ -66,11 +67,13 @@ phi->parameters->number_of_time_each_philosophers_must_eat)
 &time_action, phi->nb, " died\n");
 		}
 		phi->time_last_meal = NULL;
-		pthread_mutex_unlock(phi->lock_last_meal);
+		if (sem_post(phi->sem_last_meal)) //TODO: handling error ?
+			return (ERROR_SEM);
 		return (1);
 	}
 	eating(phi);
-	pthread_mutex_unlock(phi->lock_last_meal);
+	if (sem_post(phi->sem_last_meal)) //TODO: handling error ?
+		return (ERROR_SEM);
 	return (0);
 }
 
@@ -89,26 +92,23 @@ phi->parameters->number_of_time_each_philosophers_must_eat)
 ** the right or left fork depending if the philosopher is odd or even.
 */
 
+#include <stdio.h>
+
 int			taking_forks(t_philosopher *phi)
 {
 	int				i;
-	t_fork			*fork;
 	struct timeval	time_action;
 
 	i = 0;
-	fork = ((phi->nb + i) % 2) ? phi->left_fork : phi->right_fork;
-	while (i < 2)
+	printf("%p\n", phi->parameters->forks);
+	return (1);
+	while (i++ < 2)
 	{
-		if (fork->nb_last != phi->nb)
-		{
-			pthread_mutex_lock(fork->fork); //TODO: Handling error
+			if (sem_wait(phi->parameters->forks)) //TODO: handling error ?
+				return (ERROR_SEM);
 			gettimeofday(&time_action, NULL);
 			logs(phi->parameters->time_start, &time_action, phi->nb,
 " has taken a fork\n");
-			fork->nb_last = phi->nb;
-			if (++i != 2)
-				fork = ((phi->nb + i) % 2) ? phi->left_fork : phi->right_fork;
-		}
 	}
 	if (!phi->time_last_meal)
 		return (1);
@@ -141,12 +141,12 @@ void		*alive(void *args)
 			return (NULL);
 		if (check_eating(phi))
 		{
-			pthread_mutex_unlock(phi->right_fork->fork); //TODO: Handling error
-			pthread_mutex_unlock(phi->left_fork->fork);
+			sem_post(phi->parameters->forks); //TODO: handling error
+			sem_post(phi->parameters->forks);
 			return (NULL);
 		}
-		pthread_mutex_unlock(phi->right_fork->fork);
-		pthread_mutex_unlock(phi->left_fork->fork);
+		sem_post(phi->parameters->forks);
+		sem_post(phi->parameters->forks);
 		gettimeofday(&time_action, NULL);
 		logs(phi->parameters->time_start,
 &time_action, phi->nb, " is sleeping\n");
