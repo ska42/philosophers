@@ -1,22 +1,22 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   philo_two.c                                        :+:      :+:    :+:   */
+/*   philo_three.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2020/06/17 13:11:48 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/23 00:04:50 by lmartin          ###   ########.fr       */
+/*   Created: 2020/06/23 00:08:05 by lmartin           #+#    #+#             */
+/*   Updated: 2020/06/23 00:52:02 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "philo_two.h"
+#include "philo_three.h"
 
 /*
 ** function: {wait_philosophers}
 **
 ** parameters:
-** (t_philo_two *){phi} - program's structure
+** (t_philo_three *){phi} - program's structure
 **
 ** return (void)
 **
@@ -24,32 +24,41 @@
 ** wait for a philosopher to finish, then kill all if one has died.
 */
 
-void	wait_philosophers(t_philo_two *phi)
+#include <stdio.h>
+
+void	wait_philosophers(t_philo_three *phi)
 {
-	int				c;
 	t_philosopher	*ptr;
 
 	ptr = phi->philosophers;
-	while (!(c = 0) && ptr && !sem_wait(ptr->sem_last_meal)) // TODO: All sem error handler
+	printf("ok\n");
+	wait(NULL);
+	/*
+	while (ptr) // TODO: All sem error handler
 	{
-		if (!ptr->time_last_meal &&
-ptr->nb_eat != phi->parameters->number_of_time_each_philosophers_must_eat
-	&& !sem_post(ptr->sem_last_meal))
+		if (sem_wait(ptr->sem_last_meal))
+			printf("OHOHOHOHOH\n");
+		//TODO: NB_EAT EN SEMAPHORE POUR CHAQUE PHILOSOPHE
+		if (ptr->nb_eat != phi->parameters->number_of_time_each_philosophers_must_eat
+	&& sem_wait(ptr->sem_last_meal))
 			break ;
 		else if (ptr->nb_eat !=
 phi->parameters->number_of_time_each_philosophers_must_eat && !ptr->next &&
 !sem_post(ptr->sem_last_meal) && (ptr = phi->philosophers))
 			continue ;
 		ptr = (!sem_post(ptr->sem_last_meal)) ? ptr->next : ptr;
-	}
+	}*/
+	printf("ALLOOOOOOO\n");
 	ptr = phi->philosophers;
-	while (c < phi->parameters->number_of_philosophers &&
-!sem_wait(ptr->sem_last_meal))
+	while (ptr)
 	{
-		c += (!ptr->time_last_meal) ? 1 : !!(ptr->time_last_meal = NULL) + 0;
-		ptr = (!sem_post(ptr->sem_last_meal)) ? ptr->next : ptr;
-		if (!ptr && c != phi->parameters->number_of_philosophers)
-			ptr = !(c *= 0) ? phi->philosophers : ptr;
+		kill(ptr->pid, SIGINT);
+		if (!sem_wait(ptr->sem_last_meal))
+		{
+			sem_post(ptr->sem_last_meal);
+			sem_close(ptr->sem_last_meal);//TODO: CHECK
+		}	
+		ptr = ptr->next;
 	}
 }
 
@@ -57,7 +66,7 @@ phi->parameters->number_of_time_each_philosophers_must_eat && !ptr->next &&
 ** function: {launch_philosophers}
 **
 ** parameters:
-** (t_philo_two *){phi} - program's structure
+** (t_philo_three *){phi} - program's structure
 **
 ** return (int): error's code
 **
@@ -66,9 +75,10 @@ phi->parameters->number_of_time_each_philosophers_must_eat && !ptr->next &&
 ** launch all pthread on philosophers then call {wait_philosophers}
 */
 
-int		launch_philosophers(t_philo_two *phi)
+int		launch_philosophers(t_philo_three *phi)
 {
-	t_philosopher *ptr;
+	int				pid;
+	t_philosopher	*ptr;
 
 	if (!(phi->parameters->time_start = malloc(sizeof(struct timeval))))
 		return (ERROR_MALLOC);
@@ -80,8 +90,12 @@ int		launch_philosophers(t_philo_two *phi)
 		ptr->time_last_meal->tv_usec = phi->parameters->time_start->tv_usec;
 		ptr->nb_eat = 0;
 		ptr->parameters = copy_parameters(phi->parameters);
-		if (pthread_create(ptr->thread, NULL, &alive, ptr))
-			return (ERROR_PTHREAD);
+		if (!(pid = fork()))
+		{
+			alive((void *)ptr);
+			exit(0);	
+		}
+		ptr->pid = pid;
 		ptr = ptr->next;
 	}
 	wait_philosophers(phi);
@@ -92,7 +106,7 @@ int		launch_philosophers(t_philo_two *phi)
 ** function: {init_philosophers}
 **
 ** parameters:
-** (t_philo_two *){phi} - program's structure
+** (t_philo_three *){phi} - program's structure
 **
 ** return (int): error's code
 **
@@ -100,7 +114,7 @@ int		launch_philosophers(t_philo_two *phi)
 ** init all philosophers
 */
 
-int		init_philosophers(t_philo_two *phi)
+int		init_philosophers(t_philo_three *phi)
 {
 	int				i;
 	t_philosopher	*ptr;
@@ -112,13 +126,10 @@ int		init_philosophers(t_philo_two *phi)
 	while (ptr && (ptr->nb = i + 1) &&
 i++ < phi->parameters->number_of_philosophers)
 	{
-		if (!(ptr->thread = malloc(sizeof(pthread_t))))
-			return (ERROR_MALLOC);
 		if (!(ptr->time_last_meal = malloc(sizeof(struct timeval))))
 			return (ERROR_MALLOC);
 		sem_unlink("/sem_last_meal");
-		if (!(ptr->sem_last_meal = sem_open("/sem_last_meal", O_CREAT | O_TRUNC | O_RDWR,
-S_IRWXU, 1)))
+		if (!(ptr->sem_last_meal = sem_open("/sem_last_meal", O_CREAT, S_IRWXU, 1)))
 			return (ERROR_SEM);	
 		if (i < phi->parameters->number_of_philosophers &&
 	!(ptr->next = malloc(sizeof(t_philosopher))))
@@ -134,7 +145,7 @@ S_IRWXU, 1)))
 ** parameters:
 ** (int){argc} - number of arguments {argv},
 ** (char **){argv} - array of (char *) arguments,
-** (t_philo_two *){phi} - pointer to stucture to fill
+** (t_philo_three *){phi} - pointer to stucture to fill
 **
 ** return (int): too many arguments, wrong argument or others...
 **
@@ -142,7 +153,7 @@ S_IRWXU, 1)))
 ** init all arguments from {argv}
 */
 
-int		init_args(int argc, char *argv[], t_philo_two *phi)
+int		init_args(int argc, char *argv[], t_philo_three *phi)
 {
 	if (!(phi->parameters = malloc(sizeof(t_parameters))))
 		return (ERROR_MALLOC);
@@ -175,22 +186,13 @@ phi->parameters->number_of_philosophers)))
 }
 
 /*
-** PHILO_TWO
-**
-** description:
-** philosopher with threads and semaphore.
-**
-** special rules:
-** 1. All the forks are in the middle of the table.
-** 2. They have no states in memory but the number of available forks is
-** represented by a semaphore.
-** 3. Each philosopher should be a thread.
+** PHILO_THREE
 */
 
 int		main(int argc, char *argv[])
 {
-	int			ret;
-	t_philo_two	phi;
+	int				ret;
+	t_philo_three	phi;
 
 	phi.name = argv[0];
 	if ((ret = init_args(argc, argv, &phi)))
