@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/09 00:07:39 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/19 02:47:36 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/06/22 22:42:27 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@ typedef struct		s_parameters
 	size_t			time_to_sleep;
 	size_t			number_of_time_each_philosophers_must_eat;
 	sem_t			*forks;
+	sem_t			*available_eat;
 	struct timeval	*time_start;
 }					t_parameters;
 

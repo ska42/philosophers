@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/09 00:07:09 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/19 02:57:15 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/06/22 23:10:09 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ t_parameters	*copy_parameters(t_parameters *parameters)
 	copy->number_of_time_each_philosophers_must_eat =
 parameters->number_of_time_each_philosophers_must_eat;
 	copy->forks = parameters->forks;
+	copy->available_eat = parameters->available_eat;
 	if (!(copy->time_start = malloc(sizeof(struct timeval))))
 	{
 		free(copy);

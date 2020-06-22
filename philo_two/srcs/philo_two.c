@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/17 13:11:48 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/19 03:40:28 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/06/22 23:58:02 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,8 +66,6 @@ phi->parameters->number_of_time_each_philosophers_must_eat && !ptr->next &&
 ** launch all pthread on philosophers then call {wait_philosophers}
 */
 
-#include <stdio.h>
-
 int		launch_philosophers(t_philo_two *phi)
 {
 	t_philosopher *ptr;
@@ -84,7 +82,6 @@ int		launch_philosophers(t_philo_two *phi)
 		ptr->parameters = copy_parameters(phi->parameters);
 		if (pthread_create(ptr->thread, NULL, &alive, ptr))
 			return (ERROR_PTHREAD);
-		printf("boucle\n");
 		ptr = ptr->next;
 	}
 	wait_philosophers(phi);
@@ -111,7 +108,6 @@ int		init_philosophers(t_philo_two *phi)
 	if (!(phi->philosophers = malloc(sizeof(t_philosopher))))
 		return (ERROR_MALLOC);
 	i = 0;
-	printf("%d\n", phi->parameters->number_of_philosophers);
 	ptr = phi->philosophers;
 	while (ptr && (ptr->nb = i + 1) &&
 i++ < phi->parameters->number_of_philosophers)
@@ -120,7 +116,9 @@ i++ < phi->parameters->number_of_philosophers)
 			return (ERROR_MALLOC);
 		if (!(ptr->time_last_meal = malloc(sizeof(struct timeval))))
 			return (ERROR_MALLOC);
-		if (!(ptr->sem_last_meal = sem_open("sem_last_meal", O_CREAT)))
+		sem_unlink("/sem_last_meal");
+		if (!(ptr->sem_last_meal = sem_open("/sem_last_meal", O_CREAT | O_TRUNC | O_RDWR,
+S_IRWXU, 1)))
 			return (ERROR_SEM);	
 		if (i < phi->parameters->number_of_philosophers &&
 	!(ptr->next = malloc(sizeof(t_philosopher))))
@@ -154,8 +152,13 @@ int		init_args(int argc, char *argv[], t_philo_two *phi)
 		return (WRONG_ARG);
 	if (phi->parameters->number_of_philosophers < 2)
 		return (WRONG_ARG);
-	if (!(phi->parameters->forks = sem_open("forks", O_CREAT, S_IRWXU,
+	sem_unlink("/forks");
+	if (!(phi->parameters->forks = sem_open("/forks", O_CREAT, S_IRWXU,
 phi->parameters->number_of_philosophers)))
+		return (ERROR_SEM);
+	sem_unlink("/a_eat");
+	if (!(phi->parameters->available_eat = sem_open("/a_eat", O_CREAT, S_IRWXU,
+(int)(phi->parameters->number_of_philosophers / 2))))
 		return (ERROR_SEM);
 	if ((ft_atos(argv[2], &phi->parameters->time_to_die)))
 		return (WRONG_ARG);

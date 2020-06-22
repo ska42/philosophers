@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/09 03:18:32 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/19 03:40:31 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/06/22 23:51:19 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,24 +92,28 @@ phi->parameters->number_of_time_each_philosophers_must_eat)
 ** the right or left fork depending if the philosopher is odd or even.
 */
 
-#include <stdio.h>
-
 int			taking_forks(t_philosopher *phi)
 {
 	int				i;
 	struct timeval	time_action;
 
+	if (sem_wait(phi->parameters->available_eat)) //TODO: handling error ?
+		return (ERROR_SEM);
 	i = 0;
-	printf("%p\n", phi->parameters->forks);
-	return (1);
 	while (i++ < 2)
 	{
 			if (sem_wait(phi->parameters->forks)) //TODO: handling error ?
+			{
+				if (sem_post(phi->parameters->available_eat))
+					return (ERROR_SEM);
 				return (ERROR_SEM);
+			}
 			gettimeofday(&time_action, NULL);
 			logs(phi->parameters->time_start, &time_action, phi->nb,
 " has taken a fork\n");
 	}
+	if (sem_post(phi->parameters->available_eat))
+		return (ERROR_SEM);
 	if (!phi->time_last_meal)
 		return (1);
 	return (0);
