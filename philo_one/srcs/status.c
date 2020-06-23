@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/09 03:18:32 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/23 02:54:07 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/06/23 22:57:17 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,19 +18,33 @@
 ** parameters:
 ** (t_philosopher *){phi} - philosopher's structure
 **
-** return (void)
+** return (int) - return no-null if death
 **
 ** description:
 ** action of eat
 */
 
-void		eating(t_philosopher *phi)
+int			eating(t_philosopher *phi)
 {
-	gettimeofday(phi->time_last_meal, NULL);
-	logs(phi->parameters->time_start, phi->time_last_meal,
-phi->nb, " is eating\n");
+	int		ret;
+
+	if (!phi->time_last_meal)
+	{
+		if (pthread_mutex_unlock(phi->lock_last_meal))
+			throw_error("philosopher", ERROR_MUTEX);
+		return (1);
+	}
+	if (gettimeofday(phi->time_last_meal, NULL))
+		throw_error("philosopher", ERROR_TIMEOFDAY);
+	if ((ret = logs(phi->parameters->time_start, phi->time_last_meal,
+phi->nb, " is eating\n")))
+		throw_error("philosopher", ret);
 	phi->nb_eat++;
-	usleep(phi->parameters->time_to_eat * 1000);
+	if (usleep(phi->parameters->time_to_eat * 1000))
+		throw_error("philosopher", ERROR_SLEEP);
+	if (pthread_mutex_unlock(phi->lock_last_meal))
+		throw_error("philosopher", ERROR_MUTEX);
+	return (0);
 }
 
 /*
@@ -48,10 +62,13 @@ phi->nb, " is eating\n");
 
 int			check_eating(t_philosopher *phi)
 {
+	int				ret;
 	struct timeval	time_action;
 
-	gettimeofday(&time_action, NULL);
-	pthread_mutex_lock(phi->lock_last_meal);
+	if (gettimeofday(&time_action, NULL))
+		throw_error("philosopher", ERROR_TIMEOFDAY);
+	if (pthread_mutex_lock(phi->lock_last_meal))
+		throw_error("philosopher", ERROR_MUTEX);
 	if (phi->nb_eat ==
 phi->parameters->number_of_time_each_philosophers_must_eat ||
 !phi->time_last_meal || ((size_t)((time_action.tv_sec -
@@ -62,16 +79,13 @@ phi->time_last_meal->tv_usec) * 0.001) > phi->parameters->time_to_die))
 phi->parameters->number_of_time_each_philosophers_must_eat)
 		{
 			free(phi->time_last_meal);
-			logs(phi->parameters->time_start,
-&time_action, phi->nb, " died\n");
+			if ((ret = logs(phi->parameters->time_start,
+&time_action, phi->nb, " died\n")))
+				throw_error("philosopher", ret);
 		}
 		phi->time_last_meal = NULL;
-		pthread_mutex_unlock(phi->lock_last_meal);
-		return (1);
 	}
-	eating(phi);
-	pthread_mutex_unlock(phi->lock_last_meal);
-	return (0);
+	return (eating(phi));
 }
 
 /*
@@ -91,6 +105,7 @@ phi->parameters->number_of_time_each_philosophers_must_eat)
 
 int			taking_forks(t_philosopher *phi)
 {
+	int				ret;
 	int				i;
 	t_fork			*fork;
 	struct timeval	time_action;
@@ -101,17 +116,58 @@ int			taking_forks(t_philosopher *phi)
 	{
 		if (fork->nb_last != phi->nb)
 		{
-			pthread_mutex_lock(fork->fork); //TODO: Handling error
-			gettimeofday(&time_action, NULL);
-			logs(phi->parameters->time_start, &time_action, phi->nb,
-" has taken a fork\n");
-			fork->nb_last = phi->nb;
-			if (++i != 2)
+			if (pthread_mutex_lock(fork->fork))
+				throw_error("philosopher", ERROR_MUTEX);
+			if (gettimeofday(&time_action, NULL))
+				throw_error("philosopher", ERROR_TIMEOFDAY);
+			if ((ret = logs(phi->parameters->time_start, &time_action, phi->nb,
+" has taken a fork\n")))
+				throw_error("philosopher", ret);
+			if ((fork->nb_last = phi->nb) && ++i != 2)
 				fork = ((phi->nb + i) % 2) ? phi->left_fork : phi->right_fork;
 		}
 	}
 	if (!phi->time_last_meal)
 		return (1);
+	return (0);
+}
+
+/*
+** function: {routine}
+**
+** parameters:
+** (t_philosopher *){phi} - philosopher
+**
+** return (int) - no-null if death
+**
+** description:
+** routine of the philosopher (thinking - eating - sleeping)
+*/
+
+int			routine(t_philosopher *phi)
+{
+	int				ret;
+	struct timeval	time_action;
+
+	ret = check_eating(phi);
+	if (pthread_mutex_unlock(phi->right_fork->fork))
+		throw_error("philosopher", ERROR_MUTEX);
+	if (pthread_mutex_unlock(phi->left_fork->fork))
+		throw_error("philosopher", ERROR_MUTEX);
+	if (ret)
+		return (1);
+	if (gettimeofday(&time_action, NULL))
+		throw_error("philosopher", ERROR_TIMEOFDAY);
+	if ((ret = logs(phi->parameters->time_start,
+&time_action, phi->nb, " is sleeping\n")))
+		throw_error("philosopher", ret);
+	if (usleep(phi->parameters->time_to_sleep * 1000))
+		throw_error("philosopher", ERROR_SLEEP);
+	if (gettimeofday(&time_action, NULL))
+		throw_error("philosopher", ERROR_TIMEOFDAY);
+	if ((ret = logs(phi->parameters->time_start,
+&time_action, phi->nb, " is thinking\n")))
+		throw_error("philosopher", ret);
 	return (0);
 }
 
@@ -132,28 +188,9 @@ int			taking_forks(t_philosopher *phi)
 void		*alive(void *args)
 {
 	t_philosopher	*phi;
-	struct timeval	time_action;
 
 	phi = (t_philosopher *)args;
-	while (1)
-	{
-		if (taking_forks(phi))
-			return (NULL);
-		if (check_eating(phi))
-		{
-			pthread_mutex_unlock(phi->right_fork->fork); //TODO: Handling error
-			pthread_mutex_unlock(phi->left_fork->fork);
-			return (NULL);
-		}
-		pthread_mutex_unlock(phi->right_fork->fork);
-		pthread_mutex_unlock(phi->left_fork->fork);
-		gettimeofday(&time_action, NULL);
-		logs(phi->parameters->time_start,
-&time_action, phi->nb, " is sleeping\n");
-		usleep(phi->parameters->time_to_sleep * 1000);
-		gettimeofday(&time_action, NULL);
-		logs(phi->parameters->time_start,
-&time_action, phi->nb, " is thinking\n");
-	}
+	while (!taking_forks(phi) && !routine(phi))
+		NULL;
 	return (NULL);
 }

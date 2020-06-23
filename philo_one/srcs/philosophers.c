@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/16 18:58:31 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/16 19:02:09 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/06/23 21:58:09 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,39 +60,39 @@ void	unmake_pairs(t_philo_one *phi)
 ** parameters:
 ** (t_philo_one *){phi} - program's structure
 **
-** return (void)
+** return (int) - error's code
 **
 ** description:
 ** wait for a philosopher to finish, then kill all if one has died.
 */
 
-void	wait_philosophers(t_philo_one *phi)
+int		wait_philosophers(t_philo_one *phi)
 {
 	int				c;
 	t_philosopher	*ptr;
 
 	ptr = phi->philosophers;
-	while (!(c = 0) && ptr && !pthread_mutex_lock(ptr->lock_last_meal))
+	while (ptr)
 	{
-		if (!ptr->time_last_meal &&
-ptr->nb_eat != phi->parameters->number_of_time_each_philosophers_must_eat
-	&& !pthread_mutex_unlock(ptr->lock_last_meal))
-			break ;
-		else if (ptr->nb_eat !=
-phi->parameters->number_of_time_each_philosophers_must_eat && !ptr->next &&
-!pthread_mutex_unlock(ptr->lock_last_meal) && (ptr = phi->philosophers))
-			continue ;
-		ptr = (!pthread_mutex_unlock(ptr->lock_last_meal)) ? ptr->next : ptr;
+		if ((!ptr->time_last_meal || !ptr->next) && ptr->nb_eat !=
+phi->parameters->number_of_time_each_philosophers_must_eat)
+			ptr = (ptr->time_last_meal) ? phi->philosophers : NULL;
+		else
+			ptr = ptr->next;
 	}
+	c = 0;
 	ptr = phi->philosophers;
-	while (c < phi->parameters->number_of_philosophers &&
-!pthread_mutex_lock(ptr->lock_last_meal))
+	while (c < phi->parameters->number_of_philosophers)
 	{
+		if (pthread_mutex_lock(ptr->lock_last_meal))
+			return (ERROR_MUTEX);
 		c += (!ptr->time_last_meal) ? 1 : !!(ptr->time_last_meal = NULL) + 0;
-		ptr = (!pthread_mutex_unlock(ptr->lock_last_meal)) ? ptr->next : ptr;
-		if (!ptr && c != phi->parameters->number_of_philosophers)
-			ptr = !(c *= 0) ? phi->philosophers : ptr;
+		if (pthread_mutex_unlock(ptr->lock_last_meal))
+			return (ERROR_MUTEX);
+		if (!(ptr = ptr->next) && c != phi->parameters->number_of_philosophers)
+			ptr = !(c *= 0) ? phi->philosophers : NULL;
 	}
+	return (0);
 }
 
 /*
@@ -133,8 +133,7 @@ int		launch_philosophers(t_philo_one *phi)
 			return (ERROR_PTHREAD);
 		ptr = ptr->next;
 	}
-	wait_philosophers(phi);
-	return (0);
+	return (wait_philosophers(phi) ? ERROR_MUTEX : 0);
 }
 
 /*

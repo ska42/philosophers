@@ -6,11 +6,42 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/09 00:07:02 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/17 12:49:29 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/06/23 22:54:50 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo_one.h"
+
+/*
+** function: {clean_philosopher}
+**
+** parameters:
+** (t_philosopher *){phi} - a philosopher
+**
+** return (void)
+**
+** description:
+** free a philosopher and his parameters
+*/
+
+void	clean_philosopher(t_philosopher *phi)
+{
+	if (phi->parameters)
+		free(phi->parameters->time_start);
+	free(phi->parameters);
+	if (phi->left_fork && phi->left_fork->fork &&
+pthread_mutex_destroy(phi->left_fork->fork))
+		throw_error("philosopher", ERROR_MUTEX);
+	if (phi->left_fork)
+		free(phi->left_fork->fork);
+	free(phi->left_fork);
+	if (phi->lock_last_meal && pthread_mutex_destroy(phi->lock_last_meal))
+		throw_error("philosopher", ERROR_MUTEX);
+	free(phi->lock_last_meal);
+	free(phi->thread);
+	free(phi->time_last_meal);
+	free(phi);
+}
 
 /*
 ** function: {clean_all}
@@ -29,23 +60,17 @@ int		clean_all(t_philo_one *phi)
 	void			*temp;
 	t_philosopher	*ptr;
 
-	ptr = phi->philosophers;
+	ptr = (phi) ? phi->philosophers : NULL;
 	while (ptr)
 	{
 		temp = ptr->next;
-		free(ptr->parameters->time_start);
-		free(ptr->parameters);
-		pthread_mutex_destroy(ptr->left_fork->fork);
-		pthread_mutex_destroy(ptr->lock_last_meal);
-		free(ptr->left_fork);
-		free(ptr->lock_last_meal);
-		free(ptr->thread);
-		free(ptr->time_last_meal);
-		free(ptr);
+		clean_philosopher(ptr);
 		ptr = temp;
 	}
-	free(phi->parameters->time_start);
-	free(phi->parameters);
+	if (phi && phi->parameters)
+		free(phi->parameters->time_start);
+	if (phi)
+		free(phi->parameters);
 	return (0);
 }
 
@@ -66,7 +91,8 @@ int		clean_all(t_philo_one *phi)
 int		init_args(int argc, char *argv[], t_philo_one *phi)
 {
 	if (!(phi->parameters = malloc(sizeof(t_parameters))))
-		return (ERROR_MALLOC);
+		return (!!(phi->parameters = NULL) + ERROR_MALLOC);
+	phi->parameters->time_start = NULL;
 	if (argc < 5 || argc > 6)
 		return (TOO_MANY_ARGS);
 	if (ft_atos(argv[1], (size_t *)&phi->parameters->number_of_philosophers))
@@ -80,7 +106,7 @@ int		init_args(int argc, char *argv[], t_philo_one *phi)
 	if ((ft_atos(argv[4], &phi->parameters->time_to_sleep)))
 		return (WRONG_ARG);
 	if (argc == 6 && (ft_atos(argv[5],
-(size_t *)&phi->parameters->number_of_time_each_philosophers_must_eat)))
+&phi->parameters->number_of_time_each_philosophers_must_eat)))
 		return (WRONG_ARG);
 	else if (argc == 5)
 		phi->parameters->number_of_time_each_philosophers_must_eat = -1;
