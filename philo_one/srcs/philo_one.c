@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/09 00:07:02 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/23 22:54:50 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/06/23 23:37:14 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,12 +31,12 @@ void	clean_philosopher(t_philosopher *phi)
 	free(phi->parameters);
 	if (phi->left_fork && phi->left_fork->fork &&
 pthread_mutex_destroy(phi->left_fork->fork))
-		throw_error("philosopher", ERROR_MUTEX);
+		throw_error(ERROR_MUTEX);
 	if (phi->left_fork)
 		free(phi->left_fork->fork);
 	free(phi->left_fork);
 	if (phi->lock_last_meal && pthread_mutex_destroy(phi->lock_last_meal))
-		throw_error("philosopher", ERROR_MUTEX);
+		throw_error(ERROR_MUTEX);
 	free(phi->lock_last_meal);
 	free(phi->thread);
 	free(phi->time_last_meal);
@@ -134,11 +134,14 @@ int		main(int argc, char *argv[])
 
 	phi.name = argv[0];
 	if ((ret = init_args(argc, argv, &phi)))
-		return (throw_error(phi.name, ret) + clean_all(&phi));
+		return (throw_error(ret) + clean_all(&phi));
 	if ((ret = init_philosophers(&phi)))
-		return (throw_error(phi.name, ret) + clean_all(&phi));
+		return (throw_error(ret) + clean_all(&phi));
 	unmake_pairs(&phi);
 	if ((ret = launch_philosophers(&phi)))
-		return (throw_error(phi.name, ret) + clean_all(&phi));
+		return (throw_error(ret) + clean_all(&phi));
+	if (usleep((phi.parameters->time_to_eat +
+phi.parameters->time_to_sleep) * 1000))
+		throw_error(ERROR_SLEEP);
 	clean_all(&phi);
 }

@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/09 00:03:02 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/23 22:09:29 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/06/23 23:15:15 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,19 +16,16 @@
 ** function: {msg_error}
 **
 ** parameters:
-** (char *){prg_name} - program's name,
 ** (char *){msg} - error's message (ex: malloc error)
 **
 ** return (void)
 **
 ** description:
-** send an error in stderr_fileno as:
-** "prg_name: msg_error"
+** send an error in stderr_fileno
 */
 
-void	msg_error(char *prg_name, char *msg)
+void	msg_error(char *msg)
 {
-	write(STDERR_FILENO, prg_name, ft_strlen(prg_name));
 	write(STDERR_FILENO, msg, ft_strlen(msg));
 }
 
@@ -36,7 +33,6 @@ void	msg_error(char *prg_name, char *msg)
 ** function: {throw_error}
 **
 ** parameters:
-** (char *){prg_name} - program's name,
 ** (int) {error} - error's number
 **
 ** return (int): error's number
@@ -45,22 +41,22 @@ void	msg_error(char *prg_name, char *msg)
 ** call msg_error by corresponding the given error code {error} with a message
 */
 
-int		throw_error(char *prg_name, int error)
+int		throw_error(int error)
 {
 	if (error == TOO_MANY_ARGS)
-		msg_error(prg_name, ": Wrong number of arguments\n");
+		msg_error("Error: Wrong number of arguments\n");
 	else if (error == WRONG_ARG)
-		msg_error(prg_name, ": Wrong argument\n");
+		msg_error("Error: Wrong argument\n");
 	else if (error == ERROR_MALLOC)
-		msg_error(prg_name, ": malloc error\n");
+		msg_error("Error: malloc error\n");
 	else if (error == ERROR_MUTEX)
-		msg_error(prg_name, ": mutex error\n");
+		msg_error("Error: mutex error\n");
 	else if (error == ERROR_PTHREAD)
-		msg_error(prg_name, ": pthread error\n");
+		msg_error("Error: pthread error\n");
 	else if (error == ERROR_SLEEP)
-		msg_error(prg_name, ": usleep error\n");
+		msg_error("Error: usleep error\n");
 	else if (error == ERROR_TIMEOFDAY)
-		msg_error(prg_name, ": gettimeofday error\n");
+		msg_error("Error: gettimeofday error\n");
 	return (error);
 }
 
