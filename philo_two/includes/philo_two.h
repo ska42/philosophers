@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/17 13:12:39 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/19 02:52:33 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/06/24 03:45:04 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,23 +25,6 @@
 # include "logs.h"
 # include "utils.h"
 # include "status.h"
-
-typedef struct		s_philosopher
-{
-	size_t			nb;
-	size_t			nb_eat;
-	t_parameters	*parameters;
-	pthread_t		*thread;
-	struct timeval	*time_last_meal;
-	sem_t			*sem_last_meal;
-	void			*next;
-}					t_philosopher;
-
-typedef struct		s_philo_two
-{
-	char			*name;
-	t_parameters	*parameters;
-	t_philosopher	*philosophers;
-}					t_philo_two;
+# include "philosophers.h"
 
 #endif
