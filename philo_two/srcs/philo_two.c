@@ -6,11 +6,73 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/17 13:11:48 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/24 03:43:58 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/06/24 04:51:08 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo_two.h"
+
+/*
+** function: {clean_philosopher}
+**
+** parameters:
+** (t_philosopher *){phi} - a philosopher
+**
+** return (void)
+**
+** description:
+** free a philosopher and his parameters
+*/
+
+void	clean_philosopher(t_philosopher *phi)
+{
+	if (phi->parameters)
+		free(phi->parameters->time_start);
+	free(phi->parameters);
+	if (sem_close(phi->sem_last_meal))
+		;	//TODO: Handler
+	free(phi->thread);
+	free(phi->time_last_meal);
+	free(phi);
+}
+
+/*
+** function: {clean_all}
+**
+** parameters:
+** (t_philo_two *){phi} - pointer to the program's structure
+**
+** return (int) - return 0 to permit to call the function on a return
+**
+** description:
+** free all philosophers and parameters
+*/
+
+int		clean_all(t_philo_two *phi)
+{
+	void			*temp;
+	t_philosopher	*ptr;
+
+	ptr = (phi) ? phi->philosophers : NULL;
+	while (ptr)
+	{
+		temp = ptr->next;
+		clean_philosopher(ptr);
+		ptr = temp;
+	}
+	if (phi && phi->parameters)
+	{	
+		if (phi->parameters->forks && sem_close(phi->parameters->forks))
+			; //TODO: Handler
+		if (phi->parameters->available_eat &&
+sem_close(phi->parameters->available_eat)) 
+			; //TODO: Handler
+		free(phi->parameters->time_start);
+	}
+	if (phi)
+		free(phi->parameters);
+	return (0);
+}
 
 /*
 ** function: {init_args}
@@ -78,11 +140,11 @@ int		main(int argc, char *argv[])
 
 	phi.name = argv[0];
 	if ((ret = init_args(argc, argv, &phi)))
-		return (throw_error(phi.name, ret));
+		return (throw_error(ret) + clean_all(&phi));
 	if ((ret = init_philosophers(&phi)))
-		return (throw_error(phi.name, ret));
+		return (throw_error(ret) + clean_all(&phi));
 	if ((ret = launch_philosophers(&phi)))
-		return (throw_error(phi.name, ret));
-	//TODO : clear all and close sem
+		return (throw_error(ret) + clean_all(&phi));
+	clean_all(&phi);
 	return (0);
 }
