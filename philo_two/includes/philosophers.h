@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/24 03:42:11 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/24 03:44:54 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/06/27 09:35:15 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ typedef struct		s_philo_two
 	t_philosopher	*philosophers;
 }					t_philo_two;
 
-int		launch_philosophers(t_philo_two *phi);
-int		init_philosophers(t_philo_two *phi);
+int					launch_philosophers(t_philo_two *phi);
+int					init_philosophers(t_philo_two *phi);
 
 #endif

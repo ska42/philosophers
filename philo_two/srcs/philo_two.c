@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/17 13:11:48 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/24 04:51:08 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/06/27 09:36:36 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ void	clean_philosopher(t_philosopher *phi)
 		free(phi->parameters->time_start);
 	free(phi->parameters);
 	if (sem_close(phi->sem_last_meal))
-		;	//TODO: Handler
+		throw_error(ERROR_SEM);
 	free(phi->thread);
 	free(phi->time_last_meal);
 	free(phi);
@@ -61,12 +61,12 @@ int		clean_all(t_philo_two *phi)
 		ptr = temp;
 	}
 	if (phi && phi->parameters)
-	{	
+	{
 		if (phi->parameters->forks && sem_close(phi->parameters->forks))
-			; //TODO: Handler
+			throw_error(ERROR_SEM);
 		if (phi->parameters->available_eat &&
-sem_close(phi->parameters->available_eat)) 
-			; //TODO: Handler
+sem_close(phi->parameters->available_eat))
+			throw_error(ERROR_SEM);
 		free(phi->parameters->time_start);
 	}
 	if (phi)
@@ -94,9 +94,8 @@ int		init_args(int argc, char *argv[], t_philo_two *phi)
 		return (ERROR_MALLOC);
 	if (argc < 5 || argc > 6)
 		return (TOO_MANY_ARGS);
-	if (ft_atos(argv[1], (size_t *)&phi->parameters->number_of_philosophers))
-		return (WRONG_ARG);
-	if (phi->parameters->number_of_philosophers < 2)
+	if (ft_atos(argv[1], (size_t *)&phi->parameters->number_of_philosophers) ||
+phi->parameters->number_of_philosophers < 2)
 		return (WRONG_ARG);
 	sem_unlink("/forks");
 	if (!(phi->parameters->forks = sem_open("/forks", O_CREAT, S_IRWXU,
@@ -106,11 +105,9 @@ phi->parameters->number_of_philosophers)))
 	if (!(phi->parameters->available_eat = sem_open("/a_eat", O_CREAT, S_IRWXU,
 (int)(phi->parameters->number_of_philosophers / 2))))
 		return (ERROR_SEM);
-	if ((ft_atos(argv[2], &phi->parameters->time_to_die)))
-		return (WRONG_ARG);
-	if ((ft_atos(argv[3], &phi->parameters->time_to_eat)))
-		return (WRONG_ARG);
-	if ((ft_atos(argv[4], &phi->parameters->time_to_sleep)))
+	if ((ft_atos(argv[2], &phi->parameters->time_to_die)) ||
+(ft_atos(argv[3], &phi->parameters->time_to_eat)) ||
+(ft_atos(argv[4], &phi->parameters->time_to_sleep)))
 		return (WRONG_ARG);
 	if (argc == 6 && (ft_atos(argv[5],
 (size_t *)&phi->parameters->number_of_time_each_philosophers_must_eat)))

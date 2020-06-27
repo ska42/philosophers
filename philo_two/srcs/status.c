@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/09 03:18:32 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/22 23:51:19 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/06/27 09:37:20 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,19 +18,33 @@
 ** parameters:
 ** (t_philosopher *){phi} - philosopher's structure
 **
-** return (void)
+** return (int) - error's code
 **
 ** description:
 ** action of eat
 */
 
-void		eating(t_philosopher *phi)
+int			eating(t_philosopher *phi)
 {
-	gettimeofday(phi->time_last_meal, NULL);
-	logs(phi->parameters->time_start, phi->time_last_meal,
-phi->nb, " is eating\n");
+	int		ret;
+
+	if (!phi->time_last_meal)
+	{
+		if (sem_post(phi->sem_last_meal))
+			throw_error(ERROR_SEM);
+		return (1);
+	}
+	if (gettimeofday(phi->time_last_meal, NULL))
+		throw_error(ERROR_TIMEOFDAY);
+	if ((ret = logs(phi->parameters->time_start, phi->time_last_meal,
+phi->nb, " is eating\n")))
+		throw_error(ret);
 	phi->nb_eat++;
-	usleep(phi->parameters->time_to_eat * 1000);
+	if (sem_post(phi->sem_last_meal))
+		throw_error(ERROR_SEM);
+	if (usleep(phi->parameters->time_to_eat * 1000))
+		throw_error(ERROR_SLEEP);
+	return (0);
 }
 
 /*
@@ -48,11 +62,13 @@ phi->nb, " is eating\n");
 
 int			check_eating(t_philosopher *phi)
 {
+	int				ret;
 	struct timeval	time_action;
 
-	gettimeofday(&time_action, NULL);
-	if (sem_wait(phi->sem_last_meal)) // TODO: handling error ?
-		return (ERROR_SEM);
+	if (gettimeofday(&time_action, NULL))
+		throw_error(ERROR_TIMEOFDAY);
+	if (sem_wait(phi->sem_last_meal))
+		throw_error(ERROR_SEM);
 	if (phi->nb_eat ==
 phi->parameters->number_of_time_each_philosophers_must_eat ||
 !phi->time_last_meal || ((size_t)((time_action.tv_sec -
@@ -63,18 +79,13 @@ phi->time_last_meal->tv_usec) * 0.001) > phi->parameters->time_to_die))
 phi->parameters->number_of_time_each_philosophers_must_eat)
 		{
 			free(phi->time_last_meal);
-			logs(phi->parameters->time_start,
-&time_action, phi->nb, " died\n");
+			if ((ret = logs(phi->parameters->time_start,
+&time_action, phi->nb, " died\n")))
+				throw_error(ret);
 		}
 		phi->time_last_meal = NULL;
-		if (sem_post(phi->sem_last_meal)) //TODO: handling error ?
-			return (ERROR_SEM);
-		return (1);
 	}
-	eating(phi);
-	if (sem_post(phi->sem_last_meal)) //TODO: handling error ?
-		return (ERROR_SEM);
-	return (0);
+	return (eating(phi));
 }
 
 /*
@@ -86,36 +97,75 @@ phi->parameters->number_of_time_each_philosophers_must_eat)
 ** return (int) - return no-null if a philosopher has died during process
 **
 ** description:
-** each philosophers must take 2 forks before eating. To avoid every
-** philosophers to take the left or right fork at the same time and keep
-** everyone safe of a blocked situation, just giving the first and second time,
-** the right or left fork depending if the philosopher is odd or even.
+** each philosophers must take 2 forks before eating.
+** {phi->parameters->available_eat} is done to avoid that philosophers take all
+** 1 fork and deadlock
 */
 
 int			taking_forks(t_philosopher *phi)
 {
+	int				ret;
 	int				i;
 	struct timeval	time_action;
 
-	if (sem_wait(phi->parameters->available_eat)) //TODO: handling error ?
-		return (ERROR_SEM);
+	if (!phi->time_last_meal)
+		return (1);
+	if (sem_wait(phi->parameters->available_eat))
+		throw_error(ERROR_SEM);
 	i = 0;
 	while (i++ < 2)
 	{
-			if (sem_wait(phi->parameters->forks)) //TODO: handling error ?
-			{
-				if (sem_post(phi->parameters->available_eat))
-					return (ERROR_SEM);
-				return (ERROR_SEM);
-			}
-			gettimeofday(&time_action, NULL);
-			logs(phi->parameters->time_start, &time_action, phi->nb,
-" has taken a fork\n");
+		if (sem_wait(phi->parameters->forks))
+			throw_error(ERROR_SEM);
+		if (gettimeofday(&time_action, NULL))
+			throw_error(ERROR_TIMEOFDAY);
+		if ((ret = logs(phi->parameters->time_start, &time_action, phi->nb,
+" has taken a fork\n")))
+			throw_error(ret);
 	}
 	if (sem_post(phi->parameters->available_eat))
-		return (ERROR_SEM);
+		throw_error(ERROR_SEM);
+	return (0);
+}
+
+/*
+** function: {routine}
+**
+** parameters:
+** (t_philosopher *){phi} - philosopher
+**
+** return (int) - no-null if death
+**
+** description:
+** routine of the philosopher (thinking - eating - sleeping)
+*/
+
+int			routine(t_philosopher *phi)
+{
+	int				ret;
+	struct timeval	time_action;
+
+	ret = check_eating(phi);
+	if (sem_post(phi->parameters->forks))
+		throw_error(ERROR_SEM);
+	if (sem_post(phi->parameters->forks))
+		throw_error(ERROR_SEM);
+	if (ret)
+		return (ret);
+	if (gettimeofday(&time_action, NULL))
+		throw_error(ERROR_TIMEOFDAY);
+	if ((ret = logs(phi->parameters->time_start,
+&time_action, phi->nb, " is sleeping\n")))
+		throw_error(ret);
+	if (usleep(phi->parameters->time_to_sleep * 1000))
+		throw_error(ERROR_SLEEP);
 	if (!phi->time_last_meal)
 		return (1);
+	if (gettimeofday(&time_action, NULL))
+		throw_error(ERROR_TIMEOFDAY);
+	if ((ret = logs(phi->parameters->time_start,
+&time_action, phi->nb, " is thinking\n")))
+		throw_error(ret);
 	return (0);
 }
 
@@ -136,28 +186,9 @@ int			taking_forks(t_philosopher *phi)
 void		*alive(void *args)
 {
 	t_philosopher	*phi;
-	struct timeval	time_action;
 
 	phi = (t_philosopher *)args;
-	while (1)
-	{
-		if (taking_forks(phi))
-			return (NULL);
-		if (check_eating(phi))
-		{
-			sem_post(phi->parameters->forks); //TODO: handling error
-			sem_post(phi->parameters->forks);
-			return (NULL);
-		}
-		sem_post(phi->parameters->forks);
-		sem_post(phi->parameters->forks);
-		gettimeofday(&time_action, NULL);
-		logs(phi->parameters->time_start,
-&time_action, phi->nb, " is sleeping\n");
-		usleep(phi->parameters->time_to_sleep * 1000);
-		gettimeofday(&time_action, NULL);
-		logs(phi->parameters->time_start,
-&time_action, phi->nb, " is thinking\n");
-	}
+	while (!taking_forks(phi) && !routine(phi))
+		NULL;
 	return (NULL);
 }

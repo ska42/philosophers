@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/09 00:03:02 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/24 04:47:52 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/06/27 08:50:12 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,12 +49,14 @@ int		throw_error(int error)
 		msg_error("Error: Wrong argument\n");
 	else if (error == ERROR_MALLOC)
 		msg_error("Error: malloc error\n");
-	else if (error == ERROR_MUTEX)
-		msg_error("Error: mutex error\n");
 	else if (error == ERROR_PTHREAD)
 		msg_error("Error: pthread error\n");
 	else if (error == ERROR_SEM)
 		msg_error("Error: semaphore error\n");
+	else if (error == ERROR_SLEEP)
+		msg_error("Error: usleep error\n");
+	else if (error == ERROR_TIMEOFDAY)
+		msg_error("Error: gettimeofday error\n");
 	return (error);
 }
 
