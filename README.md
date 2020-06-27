@@ -6,13 +6,13 @@ This project contain multiple implementation of the dining philosophers problem.
 ## philo_one
 philosopher with threads and mutex
 ```
-Done
+Done - Don't forget to test with nb_eat
 ```
 
 ## philo_two
 philosopher with threads and semaphore
 ```
-Working but need handling errors, cleaning all...
+Done - Don't forget to test with nb_eat
 ```
 
 ## philo_three
