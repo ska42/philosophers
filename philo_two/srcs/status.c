@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/09 03:18:32 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/27 09:37:20 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/06/29 22:28:46 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,23 +69,22 @@ int			check_eating(t_philosopher *phi)
 		throw_error(ERROR_TIMEOFDAY);
 	if (sem_wait(phi->sem_last_meal))
 		throw_error(ERROR_SEM);
-	if (phi->nb_eat ==
-phi->parameters->number_of_time_each_philosophers_must_eat ||
-!phi->time_last_meal || ((size_t)((time_action.tv_sec -
+	if (!phi->time_last_meal || ((size_t)((time_action.tv_sec -
 phi->time_last_meal->tv_sec) * 1000 + (time_action.tv_usec -
 phi->time_last_meal->tv_usec) * 0.001) > phi->parameters->time_to_die))
 	{
-		if (phi->time_last_meal && phi->nb_eat !=
-phi->parameters->number_of_time_each_philosophers_must_eat)
-		{
-			free(phi->time_last_meal);
-			if ((ret = logs(phi->parameters->time_start,
+		free(phi->time_last_meal);
+		if ((ret = logs(phi->parameters->time_start,
 &time_action, phi->nb, " died\n")))
-				throw_error(ret);
-		}
+			throw_error(ret);
 		phi->time_last_meal = NULL;
 	}
-	return (eating(phi));
+	ret = eating(phi);
+	if (sem_post(phi->parameters->forks))
+		throw_error(ERROR_SEM);
+	if (sem_post(phi->parameters->forks))
+		throw_error(ERROR_SEM);
+	return (ret);
 }
 
 /*
@@ -145,12 +144,8 @@ int			routine(t_philosopher *phi)
 	int				ret;
 	struct timeval	time_action;
 
-	ret = check_eating(phi);
-	if (sem_post(phi->parameters->forks))
-		throw_error(ERROR_SEM);
-	if (sem_post(phi->parameters->forks))
-		throw_error(ERROR_SEM);
-	if (ret)
+	if ((ret = check_eating(phi)) || (phi->nb_eat ==
+phi->parameters->number_of_time_each_philosophers_must_eat && (ret = 1)))
 		return (ret);
 	if (gettimeofday(&time_action, NULL))
 		throw_error(ERROR_TIMEOFDAY);

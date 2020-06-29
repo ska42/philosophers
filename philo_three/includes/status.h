@@ -6,13 +6,13 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/09 04:09:06 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/19 02:46:33 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/06/29 21:42:51 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef STATUS_H
 # define STATUS_H
 
-void	*alive(void *ptr);
+void	alive(void *ptr);
 
 #endif

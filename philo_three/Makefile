@@ -6,7 +6,7 @@
 #    By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/06/17 13:10:53 by lmartin           #+#    #+#              #
-#    Updated: 2020/06/23 00:16:46 by lmartin          ###   ########.fr        #
+#    Updated: 2020/06/29 21:26:49 by lmartin          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -67,7 +67,8 @@ DIR_OBJS	=	./compiled_srcs/
 
 # FILES #
 
-SRC			=	philo_three.c \
+SRC			=	philosophers.c \
+				philo_three.c \
 				logs.c \
 				status.c \
 				utils.c

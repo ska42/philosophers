@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/09 00:03:02 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/23 00:05:46 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/06/29 21:12:44 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,29 +16,23 @@
 ** function: {msg_error}
 **
 ** parameters:
-** (char *){prg_name} - program's name,
 ** (char *){msg} - error's message (ex: malloc error)
 **
 ** return (void)
 **
 ** description:
 ** send an error in stderr_fileno as:
-** "prg_name: msg_error"
 */
 
-void	msg_error(char *prg_name, char *msg)
+void	msg_error(char *msg)
 {
-	write(STDERR_FILENO, prg_name, ft_strlen(prg_name));
-	write(STDERR_FILENO, ": ", 2);
 	write(STDERR_FILENO, msg, ft_strlen(msg));
-	write(STDERR_FILENO, "\n", 1);
 }
 
 /*
 ** function: {throw_error}
 **
 ** parameters:
-** (char *){prg_name} - program's name,
 ** (int) {error} - error's number
 **
 ** return (int): error's number
@@ -47,20 +41,22 @@ void	msg_error(char *prg_name, char *msg)
 ** call msg_error by corresponding the given error code {error} with a message
 */
 
-int		throw_error(char *prg_name, int error)
+int		throw_error(int error)
 {
 	if (error == TOO_MANY_ARGS)
-		msg_error(prg_name, "Wrong number of arguments");
+		msg_error("Error: Wrong number of arguments\n");
 	else if (error == WRONG_ARG)
-		msg_error(prg_name, "Wrong argument");
+		msg_error("Error: Wrong argument\n");
 	else if (error == ERROR_MALLOC)
-		msg_error(prg_name, "malloc error");
-	else if (error == ERROR_MUTEX)
-		msg_error(prg_name, "mutex error");
+		msg_error("Error: malloc error\n");
 	else if (error == ERROR_PTHREAD)
-		msg_error(prg_name, "pthread error");
+		msg_error("Error: pthread error\n");
 	else if (error == ERROR_SEM)
-		msg_error(prg_name, "semaphore error");
+		msg_error("Error: semaphore error\n");
+	else if (error == ERROR_SLEEP)
+		msg_error("Error: usleep error\n");
+	else if (error == ERROR_TIMEOFDAY)
+		msg_error("Error: gettimeofday error\n");
 	return (error);
 }
 

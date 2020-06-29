@@ -6,136 +6,68 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/23 00:08:05 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/23 00:52:02 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/06/29 21:31:09 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo_three.h"
 
 /*
-** function: {wait_philosophers}
+** function: {clean_philosopher}
 **
 ** parameters:
-** (t_philo_three *){phi} - program's structure
+** (t_philosopher *){phi} - a philosopher
 **
 ** return (void)
 **
 ** description:
-** wait for a philosopher to finish, then kill all if one has died.
+** free a philosopher and his parameters
 */
 
-#include <stdio.h>
-
-void	wait_philosophers(t_philo_three *phi)
+void	clean_philosopher(t_philosopher *phi)
 {
-	t_philosopher	*ptr;
-
-	ptr = phi->philosophers;
-	printf("ok\n");
-	wait(NULL);
-	/*
-	while (ptr) // TODO: All sem error handler
-	{
-		if (sem_wait(ptr->sem_last_meal))
-			printf("OHOHOHOHOH\n");
-		//TODO: NB_EAT EN SEMAPHORE POUR CHAQUE PHILOSOPHE
-		if (ptr->nb_eat != phi->parameters->number_of_time_each_philosophers_must_eat
-	&& sem_wait(ptr->sem_last_meal))
-			break ;
-		else if (ptr->nb_eat !=
-phi->parameters->number_of_time_each_philosophers_must_eat && !ptr->next &&
-!sem_post(ptr->sem_last_meal) && (ptr = phi->philosophers))
-			continue ;
-		ptr = (!sem_post(ptr->sem_last_meal)) ? ptr->next : ptr;
-	}*/
-	printf("ALLOOOOOOO\n");
-	ptr = phi->philosophers;
-	while (ptr)
-	{
-		kill(ptr->pid, SIGINT);
-		if (!sem_wait(ptr->sem_last_meal))
-		{
-			sem_post(ptr->sem_last_meal);
-			sem_close(ptr->sem_last_meal);//TODO: CHECK
-		}	
-		ptr = ptr->next;
-	}
+	if (phi->parameters)
+		free(phi->parameters->time_start);
+	free(phi->parameters);
+	free(phi->time_last_meal);
+	free(phi);
 }
 
 /*
-** function: {launch_philosophers}
+** function: {clean_all}
 **
 ** parameters:
-** (t_philo_three *){phi} - program's structure
+** (t_philo_three *){phi} - pointer to the program's structure
 **
-** return (int): error's code
+** return (int) - return 0 to permit to call the function on a return
 **
 ** description:
-** allocate and setup the lock on last_meal and
-** launch all pthread on philosophers then call {wait_philosophers}
+** free all philosophers and parameters
 */
 
-int		launch_philosophers(t_philo_three *phi)
+int		clean_all(t_philo_three *phi)
 {
-	int				pid;
+	void			*temp;
 	t_philosopher	*ptr;
 
-	if (!(phi->parameters->time_start = malloc(sizeof(struct timeval))))
-		return (ERROR_MALLOC);
-	gettimeofday(phi->parameters->time_start, NULL);
-	ptr = phi->philosophers;
+	ptr = (phi) ? phi->philosophers : NULL;
 	while (ptr)
 	{
-		ptr->time_last_meal->tv_sec = phi->parameters->time_start->tv_sec;
-		ptr->time_last_meal->tv_usec = phi->parameters->time_start->tv_usec;
-		ptr->nb_eat = 0;
-		ptr->parameters = copy_parameters(phi->parameters);
-		if (!(pid = fork()))
-		{
-			alive((void *)ptr);
-			exit(0);	
-		}
-		ptr->pid = pid;
-		ptr = ptr->next;
+		temp = ptr->next;
+		clean_philosopher(ptr);
+		ptr = temp;
 	}
-	wait_philosophers(phi);
-	return (0);
-}
-
-/*
-** function: {init_philosophers}
-**
-** parameters:
-** (t_philo_three *){phi} - program's structure
-**
-** return (int): error's code
-**
-** description:
-** init all philosophers
-*/
-
-int		init_philosophers(t_philo_three *phi)
-{
-	int				i;
-	t_philosopher	*ptr;
-
-	if (!(phi->philosophers = malloc(sizeof(t_philosopher))))
-		return (ERROR_MALLOC);
-	i = 0;
-	ptr = phi->philosophers;
-	while (ptr && (ptr->nb = i + 1) &&
-i++ < phi->parameters->number_of_philosophers)
+	if (phi && phi->parameters)
 	{
-		if (!(ptr->time_last_meal = malloc(sizeof(struct timeval))))
-			return (ERROR_MALLOC);
-		sem_unlink("/sem_last_meal");
-		if (!(ptr->sem_last_meal = sem_open("/sem_last_meal", O_CREAT, S_IRWXU, 1)))
-			return (ERROR_SEM);	
-		if (i < phi->parameters->number_of_philosophers &&
-	!(ptr->next = malloc(sizeof(t_philosopher))))
-			return (ERROR_MALLOC);
-		ptr = ptr->next;
+		if (phi->parameters->forks && sem_close(phi->parameters->forks))
+			throw_error(ERROR_SEM);
+		if (phi->parameters->available_eat &&
+sem_close(phi->parameters->available_eat))
+			throw_error(ERROR_SEM);
+		free(phi->parameters->time_start);
 	}
+	if (phi)
+		free(phi->parameters);
 	return (0);
 }
 
@@ -196,11 +128,11 @@ int		main(int argc, char *argv[])
 
 	phi.name = argv[0];
 	if ((ret = init_args(argc, argv, &phi)))
-		return (throw_error(phi.name, ret));
+		return (throw_error(ret) + clean_all(&phi));
 	if ((ret = init_philosophers(&phi)))
-		return (throw_error(phi.name, ret));
+		return (throw_error(ret) + clean_all(&phi));
 	if ((ret = launch_philosophers(&phi)))
-		return (throw_error(phi.name, ret));
-	//TODO : clear all and close sem
+		return (throw_error(ret) + clean_all(&phi));
+	clean_all(&phi);
 	return (0);
 }
