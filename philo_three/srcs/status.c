@@ -6,11 +6,12 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/09 03:18:32 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/29 22:28:01 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/06/29 22:45:01 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo_three.h"
+
 /*
 ** function: {eating}
 **
@@ -67,10 +68,10 @@ phi->time_last_meal->tv_usec) * 0.001) > phi->parameters->time_to_die))
 		free(phi->time_last_meal);
 		if ((ret = logs(phi->parameters->time_start,
 &time_action, phi->nb, " died\n")))
-				throw_error(ret);
+			throw_error(ret);
 		phi->time_last_meal = NULL;
 		return (-1);
-	}	
+	}
 	ret = eating(phi);
 	if (sem_post(phi->parameters->forks))
 		throw_error(ERROR_SEM);
@@ -136,7 +137,7 @@ int			routine(t_philosopher *phi)
 	int				ret;
 	struct timeval	time_action;
 
-	if ((ret = check_eating(phi)) || (phi->nb_eat == 
+	if ((ret = check_eating(phi)) || (phi->nb_eat ==
 phi->parameters->number_of_time_each_philosophers_must_eat && (ret = 1)))
 		return (ret);
 	if (gettimeofday(&time_action, NULL))
@@ -180,7 +181,7 @@ void		alive(void *args)
 		exit(0);
 	while (!taking_forks(phi))
 	{
-		if ((ret = routine(phi)) == -1) // -1 STARVING DEAD
+		if ((ret = routine(phi)) == -1)
 			exit(1);
 		else if (ret == 1)
 			exit(0);

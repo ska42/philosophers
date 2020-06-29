@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/29 21:16:37 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/29 22:01:09 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/06/29 22:42:03 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,8 +24,6 @@
 ** wait for a philosopher to finish, then kill all if one has died.
 */
 
-#include <stdio.h>
-
 int		wait_philosophers(t_philo_three *phi)
 {
 	int				nb_end;
@@ -37,7 +35,8 @@ int		wait_philosophers(t_philo_three *phi)
 	nb_end = 0;
 	while (!status && nb_end < phi->parameters->number_of_philosophers)
 	{
-		wait(&status);
+		if (waitpid(-1, &status, 0) < 0)
+			throw_error(ERROR_FORK);
 		nb_end++;
 	}
 	if (status)
@@ -45,25 +44,11 @@ int		wait_philosophers(t_philo_three *phi)
 		ptr = phi->philosophers;
 		while (ptr)
 		{
-			kill(ptr->pid, SIGINT);
+			if (kill(ptr->pid, SIGINT))
+				throw_error(ERROR_KILL);
 			ptr = ptr->next;
 		}
 	}
-	/*
-	while (ptr) // TODO: All sem error handler
-	{
-		if (sem_wait(ptr->sem_last_meal))
-			printf("OHOHOHOHOH\n");
-		//TODO: NB_EAT EN SEMAPHORE POUR CHAQUE PHILOSOPHE
-		if (ptr->nb_eat != phi->parameters->number_of_time_each_philosophers_must_eat
-	&& sem_wait(ptr->sem_last_meal))
-			break ;
-		else if (ptr->nb_eat !=
-phi->parameters->number_of_time_each_philosophers_must_eat && !ptr->next &&
-!sem_post(ptr->sem_last_meal) && (ptr = phi->philosophers))
-			continue ;
-		ptr = (!sem_post(ptr->sem_last_meal)) ? ptr->next : ptr;
-	}*/
 	return (0);
 }
 
@@ -87,24 +72,24 @@ int		launch_philosophers(t_philo_three *phi)
 
 	if (!(phi->parameters->time_start = malloc(sizeof(struct timeval))))
 		return (ERROR_MALLOC);
-	gettimeofday(phi->parameters->time_start, NULL);
+	if (gettimeofday(phi->parameters->time_start, NULL))
+		return (ERROR_TIMEOFDAY);
 	ptr = phi->philosophers;
 	while (ptr)
 	{
 		ptr->time_last_meal->tv_sec = phi->parameters->time_start->tv_sec;
 		ptr->time_last_meal->tv_usec = phi->parameters->time_start->tv_usec;
 		ptr->nb_eat = 0;
-		ptr->parameters = copy_parameters(phi->parameters);
+		if (ptr->parameters = copy_parameters(phi->parameters))
+			return (ERROR_MALLOC);
 		if (!(pid = fork()))
-		{
 			alive((void *)ptr);
-			exit(0);	
-		}
+		if (pid < 0)
+			return (ERROR_FORK);
 		ptr->pid = pid;
 		ptr = ptr->next;
 	}
-	wait_philosophers(phi);
-	return (0);
+	return (wait_philosophers(phi));
 }
 
 /*
