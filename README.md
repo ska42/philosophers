@@ -18,5 +18,5 @@ Done
 ## philo_three
 philosopher with processes and semaphore
 ```
-Working but need handling errors...
+Done...
 ```
