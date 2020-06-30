@@ -6,7 +6,7 @@
 #    By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/12/19 23:21:49 by lmartin           #+#    #+#              #
-#    Updated: 2020/06/30 04:26:33 by lmartin          ###   ########.fr        #
+#    Updated: 2020/06/30 21:11:12 by lmartin          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -109,8 +109,11 @@ re:				fclean all
 # NORME #
 
 norm:
+				@printf	"$(_BLUE)$(_BOLD)$(PHILO_ONE) $(_END)\n"
 				make norm -C $(SRCS)/$(PHILO_ONE)
+				@printf	"$(_BLUE)$(_BOLD)$(PHILO_TWO) $(_END)\n"
 				make norm -C $(SRCS)/$(PHILO_TWO)
+				@printf	"$(_BLUE)$(_BOLD)$(PHILO_THREE) $(_END)\n"
 				make norm -C $(SRCS)/$(PHILO_THREE)
 
 # BONUS #
