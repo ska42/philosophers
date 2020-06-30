@@ -6,7 +6,7 @@
 #    By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/06/17 13:10:53 by lmartin           #+#    #+#              #
-#    Updated: 2020/06/29 21:26:49 by lmartin          ###   ########.fr        #
+#    Updated: 2020/06/30 04:19:31 by lmartin          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -85,12 +85,15 @@ NAME 		=	philo_three
 
 # **************************************************************************** #
 
+
 ## RULES ##
+
+all:			$(NAME)
 
 # VARIABLES RULES #
 
 $(NAME):		$(OBJS)
-				@echo "$(_GREEN) All files compiled into '$(DIR_OBJS)'. $(_END)✅"
+				@printf "\033[2K\r$(_GREEN) All files compiled into '$(DIR_OBJS)'. $(_END)✅\n"
 				@$(CC) $(CC_FLAGS) -I $(DIR_HEADERS) $(OBJS) -o $(NAME)
 				@echo "$(_GREEN) Executable '$(NAME)' created. $(_END)✅"
 
@@ -98,8 +101,10 @@ $(NAME):		$(OBJS)
 
 $(OBJS):		| $(DIR_OBJS)
 
+
 $(DIR_OBJS)%.o: $(DIR_SRCS)%.c
 				@$(CC) $(CC_FLAGS) -I $(DIR_HEADERS) -c $< -o $@
+				@printf "\033[2K\r $(_YELLOW)Compiling $< $(_END)⌛"
 
 $(DIR_OBJS):
 				@mkdir $(DIR_OBJS)
@@ -107,15 +112,13 @@ $(DIR_OBJS):
 
 # OBLIGATORY PART #
 
-all:			$(NAME)
-
 clean:
 				@$(RM) $(DIR_OBJS)
-				@echo "$(_RED)'"$(DIR_OBJS)"' has been deleted. $(_END)🗑️"
+				@echo "$(_RED) '"$(DIR_OBJS)"' has been deleted. $(_END)🗑️"
 
 fclean:			clean
 				@$(RM) $(NAME)
-				@echo "$(_RED)'"$(NAME)"' has been deleted. $(_END)🗑️"
+				@echo "$(_RED) '"$(NAME)"' has been deleted. $(_END)🗑️"
 
 re:				fclean all
 
@@ -133,4 +136,5 @@ re_bonus:		fclean bonus
 
 # PHONY #
 
-.PHONY:			all, clean, fclean, re, bonus, re_bonus
+.PHONY:			all clean fclean re bonus re_bonus
+

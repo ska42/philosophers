@@ -6,7 +6,7 @@
 #    By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/12/19 23:21:49 by lmartin           #+#    #+#              #
-#    Updated: 2020/06/16 19:08:44 by lmartin          ###   ########.fr        #
+#    Updated: 2020/06/30 04:26:33 by lmartin          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -44,86 +44,74 @@ _IWHITE		=	\x1b[47m
 
 ## VARIABLES ##
 
-# COMPILATION #
+SRCS		=	./srcs
 
-CC			=	gcc
-
-CC_FLAGS	=	-Wall -Wextra -Werror
-
+DIR			=	./
 
 # DELETE #
 
 RM			=	rm -rf
 
-
-# DIRECTORIES #
-
-DIR_HEADERS =	./includes/
-
-DIR_SRCS	=	./srcs/
-
-DIR_OBJS	=	./compiled_srcs/
-
-
-# FILES #
-
-SRC			=	logs.c \
-				utils.c \
-				philo_one.c \
-				philosophers.c \
-				status.c
-
-SRCS		=	$(SRC)
-
-
 # COMPILED_SOURCES #
 
-OBJS 		=	$(SRCS:%.c=$(DIR_OBJS)%.o)
+PHILO_ONE	=	philo_one
 
-NAME 		=	philo_one
+PHILO_TWO	=	philo_two
 
+PHILO_THREE	=	philo_three
 
 # **************************************************************************** #
 
 ## RULES ##
 
+all:			$(PHILO_ONE) $(PHILO_TWO) $(PHILO_THREE)
+
 # VARIABLES RULES #
 
-$(NAME):		$(OBJS)
-				@echo "$(_GREEN) All files compiled into '$(DIR_OBJS)'. $(_END)✅"
-				@$(CC) $(CC_FLAGS) -I $(DIR_HEADERS) $(OBJS) -o $(NAME)
-				@echo "$(_GREEN) Executable '$(NAME)' created. $(_END)✅"
+$(PHILO_ONE):		
+				@printf	"$(_BLUE)$(_BOLD)$(PHILO_ONE) $(_END)\n"
+				@$(MAKE) -C $(SRCS)/$(PHILO_ONE) MAKEFLAGS=
+				@cp -rf $(SRCS)/$(PHILO_ONE)/$(PHILO_ONE) $(DIR)/$(PHILO_ONE)
 
-# COMPILED_SOURCES RULES #
+$(PHILO_TWO):	
+				@printf	"$(_BLUE)$(_BOLD)$(PHILO_TWO) $(_END)\n"
+				@$(MAKE) -C $(SRCS)/$(PHILO_TWO)/ MAKEFLAGS=
+				@cp -rf $(SRCS)/$(PHILO_TWO)/$(PHILO_TWO) ./$(PHILO_TWO)
 
-$(OBJS):		| $(DIR_OBJS)
-
-$(DIR_OBJS)%.o: $(DIR_SRCS)%.c
-				@$(CC) $(CC_FLAGS) -I $(DIR_HEADERS) -c $< -o $@
-
-$(DIR_OBJS):
-				@mkdir $(DIR_OBJS)
-
+$(PHILO_THREE):	
+				@printf	"$(_BLUE)$(_BOLD)$(PHILO_THREE) $(_END)\n"
+				@$(MAKE) -C $(SRCS)/$(PHILO_THREE)/ MAKEFLAGS=
+				@cp -rf $(SRCS)/$(PHILO_THREE)/$(PHILO_THREE) ./$(PHILO_THREE)
 
 # OBLIGATORY PART #
 
-all:			$(NAME)
-
 clean:
-				@$(RM) $(DIR_OBJS)
-				@echo "$(_RED)'"$(DIR_OBJS)"' has been deleted. $(_END)🗑️"
+				@printf	"$(_BLUE)$(_BOLD)$(PHILO_ONE) $(_END)\n"
+				@make clean -C $(SRCS)/$(PHILO_ONE)
+				@printf	"$(_BLUE)$(_BOLD)$(PHILO_TWO) $(_END)\n"
+				@make clean -C $(SRCS)/$(PHILO_TWO)
+				@printf	"$(_BLUE)$(_BOLD)$(PHILO_THREE) $(_END)\n"
+				@make clean -C $(SRCS)/$(PHILO_THREE)
 
-fclean:			clean
-				@$(RM) $(NAME)
-				@echo "$(_RED)'"$(NAME)"' has been deleted. $(_END)🗑️"
+fclean:			
+				@printf	"$(_BLUE)$(_BOLD)$(PHILO_ONE) $(_END)\n"
+				@make fclean -C $(SRCS)/$(PHILO_ONE)
+				@printf	"$(_BLUE)$(_BOLD)$(PHILO_TWO) $(_END)\n"
+				@make fclean -C $(SRCS)/$(PHILO_TWO)
+				@printf	"$(_BLUE)$(_BOLD)$(PHILO_THREE) $(_END)\n"
+				@make fclean -C $(SRCS)/$(PHILO_THREE)
+				@$(RM) $(PHILO_ONE)
+				@$(RM) $(PHILO_TWO)
+				@$(RM) $(PHILO_THREE)
 
 re:				fclean all
 
 # NORME #
 
 norm:
-				norminette $(DIR_SRCS)
-				norminette $(DIR_HEADERS)
+				make norm -C $(SRCS)/$(PHILO_ONE)
+				make norm -C $(SRCS)/$(PHILO_TWO)
+				make norm -C $(SRCS)/$(PHILO_THREE)
 
 # BONUS #
 
@@ -133,4 +121,4 @@ re_bonus:		fclean bonus
 
 # PHONY #
 
-.PHONY:			all, clean, fclean, re, bonus, re_bonus
+.PHONY:			all clean fclean re bonus re_bonus philo_one philo_two philo_three
