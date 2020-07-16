@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/17 13:11:48 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/27 09:36:36 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/07/16 13:41:58 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,6 +139,8 @@ int		main(int argc, char *argv[])
 	phi.philosophers = NULL;
 	if ((ret = init_args(argc, argv, &phi)))
 		return (throw_error(ret) + clean_all(&phi));
+	if (!phi.parameters->number_of_time_each_philosophers_must_eat)
+		return (clean_all(&phi));
 	if ((ret = init_philosophers(&phi)))
 		return (throw_error(ret) + clean_all(&phi));
 	if ((ret = launch_philosophers(&phi)))

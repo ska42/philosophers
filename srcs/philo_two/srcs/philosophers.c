@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/24 03:41:19 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/30 02:28:10 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/07/16 13:38:58 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,6 +88,7 @@ int		launch_philosophers(t_philo_two *phi)
 	}
 	if (wait_philosophers(phi))
 		return (ERROR_SEM);
+	usleep(100000);
 	return (0);
 }
 
@@ -123,8 +124,9 @@ i++ < phi->parameters->number_of_philosophers)
 		if (!(ptr->sem_last_meal = sem_open("/sem_last_meal",
 O_CREAT | O_TRUNC | O_RDWR, S_IRWXU, 1)))
 			return (ERROR_SEM);
-		if (i < phi->parameters->number_of_philosophers &&
-	!(ptr->next = malloc(sizeof(t_philosopher))))
+		if (i == phi->parameters->number_of_philosophers)
+			ptr->next = NULL;
+		else if (!(ptr->next = malloc(sizeof(t_philosopher))))
 			return (ERROR_MALLOC);
 		ptr = ptr->next;
 	}

@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/29 21:16:37 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/30 02:29:32 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/07/16 13:44:53 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,7 +89,7 @@ int		launch_philosophers(t_philo_three *phi)
 		ptr->pid = pid;
 		ptr = ptr->next;
 	}
-	return (wait_philosophers(phi));
+	return (wait_philosophers(phi) + usleep(100000));
 }
 
 /*
@@ -121,6 +121,8 @@ i++ < phi->parameters->number_of_philosophers)
 		if (i < phi->parameters->number_of_philosophers &&
 	!(ptr->next = malloc(sizeof(t_philosopher))))
 			return (ERROR_MALLOC);
+		else if (i == phi->parameters->number_of_philosophers)
+			ptr->next = NULL;
 		ptr = ptr->next;
 	}
 	return (0);
