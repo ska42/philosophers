@@ -21,6 +21,8 @@
 # include <unistd.h>
 # include <string.h>
 # include <signal.h>
+# include <sys/wait.h>
+# include <fcntl.h>
 
 # include "philosophers.h"
 # include "errors.h"

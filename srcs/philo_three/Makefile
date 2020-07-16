@@ -94,7 +94,7 @@ all:			$(NAME)
 
 $(NAME):		$(OBJS)
 				@printf "\033[2K\r$(_GREEN) All files compiled into '$(DIR_OBJS)'. $(_END)✅\n"
-				@$(CC) $(CC_FLAGS) -I $(DIR_HEADERS) $(OBJS) -o $(NAME)
+				@$(CC) $(CC_FLAGS) -I $(DIR_HEADERS) $(OBJS) -o $(NAME) -lpthread
 				@echo "$(_GREEN) Executable '$(NAME)' created. $(_END)✅"
 
 # COMPILED_SOURCES RULES #

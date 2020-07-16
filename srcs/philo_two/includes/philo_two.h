@@ -20,6 +20,7 @@
 # include <pthread.h>
 # include <unistd.h>
 # include <string.h>
+# include <fcntl.h>
 
 # include "errors.h"
 # include "logs.h"
