@@ -124,6 +124,7 @@ int		main(int argc, char *argv[])
 	t_philo_three	phi;
 
 	phi.name = argv[0];
+	phi.philosophers = NULL;
 	if ((ret = init_args(argc, argv, &phi)))
 		return (throw_error(ret) + clean_all(&phi));
 	if ((ret = init_philosophers(&phi)))
