@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/09 03:18:32 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/29 22:45:01 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/07/16 15:33:02 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,8 +36,7 @@ int			eating(t_philosopher *phi)
 phi->nb, " is eating\n")))
 		throw_error(ret);
 	phi->nb_eat++;
-	if (usleep(phi->parameters->time_to_eat * 1000))
-		throw_error(ERROR_SLEEP);
+	usleep(phi->parameters->time_to_eat * 1000);
 	return (0);
 }
 
@@ -97,24 +96,26 @@ phi->time_last_meal->tv_usec) * 0.001) > phi->parameters->time_to_die))
 int			taking_forks(t_philosopher *phi)
 {
 	int				ret;
-	int				i;
 	struct timeval	time_action;
 
 	if (!phi->time_last_meal)
 		return (1);
 	if (sem_wait(phi->parameters->available_eat))
 		throw_error(ERROR_SEM);
-	i = 0;
-	while (i++ < 2)
-	{
-		if (sem_wait(phi->parameters->forks))
-			throw_error(ERROR_SEM);
-		if (gettimeofday(&time_action, NULL))
-			throw_error(ERROR_TIMEOFDAY);
-		if ((ret = logs(phi->parameters->time_start, &time_action, phi->nb,
+	if (sem_wait(phi->parameters->forks))
+		throw_error(ERROR_SEM);
+	if (gettimeofday(&time_action, NULL))
+		throw_error(ERROR_TIMEOFDAY);
+	if ((ret = logs(phi->parameters->time_start, &time_action, phi->nb,
 " has taken a fork\n")))
-			throw_error(ret);
-	}
+		throw_error(ret);
+	if (sem_wait(phi->parameters->forks))
+		throw_error(ERROR_SEM);
+	if (gettimeofday(&time_action, NULL))
+		throw_error(ERROR_TIMEOFDAY);
+	if ((ret = logs(phi->parameters->time_start, &time_action, phi->nb,
+" has taken a fork\n")))
+		throw_error(ret);
 	if (sem_post(phi->parameters->available_eat))
 		throw_error(ERROR_SEM);
 	return (0);
@@ -145,8 +146,7 @@ phi->parameters->number_of_time_each_philosophers_must_eat && (ret = 1)))
 	if ((ret = logs(phi->parameters->time_start,
 &time_action, phi->nb, " is sleeping\n")))
 		throw_error(ret);
-	if (usleep(phi->parameters->time_to_sleep * 1000))
-		throw_error(ERROR_SLEEP);
+	usleep(phi->parameters->time_to_sleep * 1000);
 	if (!phi->time_last_meal)
 		return (1);
 	if (gettimeofday(&time_action, NULL))
@@ -177,14 +177,10 @@ void		alive(void *args)
 	t_philosopher	*phi;
 
 	phi = (t_philosopher *)args;
-	if (phi->parameters->number_of_time_each_philosophers_must_eat == 0)
-		exit(0);
 	while (!taking_forks(phi))
 	{
-		if ((ret = routine(phi)) == -1)
-			exit(1);
-		else if (ret == 1)
-			exit(0);
+		if ((ret = routine(phi)))
+			exit((ret == 1) ? 0 : 1);
 	}
 	exit(0);
 }
