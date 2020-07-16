@@ -6,7 +6,7 @@
 #    By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/12/19 23:21:49 by lmartin           #+#    #+#              #
-#    Updated: 2020/07/16 13:23:21 by lmartin          ###   ########.fr        #
+#    Updated: 2020/07/16 13:48:46 by lmartin          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -123,8 +123,8 @@ re:				fclean all
 # NORME #
 
 norm:
-				norminette $(DIR_SRCS)
-				norminette $(DIR_HEADERS)
+				~/.norminette/norminette.rb $(DIR_SRCS)
+				~/.norminette/norminette.rb $(DIR_HEADERS)
 
 # BONUS #
 
