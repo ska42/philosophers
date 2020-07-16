@@ -6,7 +6,7 @@
 #    By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/12/19 23:21:49 by lmartin           #+#    #+#              #
-#    Updated: 2020/06/30 04:19:10 by lmartin          ###   ########.fr        #
+#    Updated: 2020/07/16 04:37:15 by lmartin          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -92,7 +92,7 @@ all:			$(NAME)
 
 $(NAME):		$(OBJS)
 				@printf "\033[2K\r$(_GREEN) All files compiled into '$(DIR_OBJS)'. $(_END)✅\n"
-				@$(CC) $(CC_FLAGS) -I $(DIR_HEADERS) $(OBJS) -o $(NAME)
+				@$(CC) $(CC_FLAGS) -I $(DIR_HEADERS) $(OBJS) -o $(NAME) -lpthread
 				@echo "$(_GREEN) Executable '$(NAME)' created. $(_END)✅"
 
 # COMPILED_SOURCES RULES #
