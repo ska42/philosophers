@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/16 18:58:31 by lmartin           #+#    #+#             */
-/*   Updated: 2020/07/16 13:45:59 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/07/16 14:46:42 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,17 +69,17 @@ void	unmake_pairs(t_philo_one *phi)
 int		wait_philosophers(t_philo_one *phi)
 {
 	int				c;
+	int				nb;
 	t_philosopher	*ptr;
 
+	nb = phi->parameters->number_of_time_each_philosophers_must_eat;
 	ptr = phi->philosophers;
-	while (ptr)
-	{
-		if ((!ptr->time_last_meal || !ptr->next) && ptr->nb_eat !=
-phi->parameters->number_of_time_each_philosophers_must_eat)
-			ptr = (ptr->time_last_meal) ? phi->philosophers : NULL;
+	while (ptr && (c = (ptr->nb_eat < nb) ? 0 : c + 1) > -2)
+		if (!ptr->time_last_meal || !ptr->next)
+			ptr = (ptr->time_last_meal &&
+c < phi->parameters->number_of_philosophers) ? phi->philosophers : NULL;
 		else
 			ptr = ptr->next;
-	}
 	c = 0;
 	ptr = phi->philosophers;
 	while (c < phi->parameters->number_of_philosophers)

@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/09 03:18:32 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/29 22:28:46 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/07/16 14:06:32 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,7 @@ int			check_eating(t_philosopher *phi)
 		throw_error(ERROR_TIMEOFDAY);
 	if (sem_wait(phi->sem_last_meal))
 		throw_error(ERROR_SEM);
-	if (!phi->time_last_meal || ((size_t)((time_action.tv_sec -
+	if (phi->time_last_meal && ((size_t)((time_action.tv_sec -
 phi->time_last_meal->tv_sec) * 1000 + (time_action.tv_usec -
 phi->time_last_meal->tv_usec) * 0.001) > phi->parameters->time_to_die))
 	{
