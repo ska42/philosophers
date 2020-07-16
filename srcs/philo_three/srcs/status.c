@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/09 03:18:32 by lmartin           #+#    #+#             */
-/*   Updated: 2020/07/16 15:33:02 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/07/16 16:10:37 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,15 +26,12 @@
 
 int			eating(t_philosopher *phi)
 {
-	int		ret;
-
 	if (!phi->time_last_meal)
 		return (1);
 	if (gettimeofday(phi->time_last_meal, NULL))
 		throw_error(ERROR_TIMEOFDAY);
-	if ((ret = logs(phi->parameters->time_start, phi->time_last_meal,
-phi->nb, " is eating\n")))
-		throw_error(ret);
+	logs(phi->parameters->time_start, phi->time_last_meal,
+phi->nb, " is eating\n");
 	phi->nb_eat++;
 	usleep(phi->parameters->time_to_eat * 1000);
 	return (0);
@@ -65,9 +62,8 @@ phi->time_last_meal->tv_sec) * 1000 + (time_action.tv_usec -
 phi->time_last_meal->tv_usec) * 0.001) > phi->parameters->time_to_die))
 	{
 		free(phi->time_last_meal);
-		if ((ret = logs(phi->parameters->time_start,
-&time_action, phi->nb, " died\n")))
-			throw_error(ret);
+		logs(phi->parameters->time_start,
+&time_action, phi->nb, " died\n");
 		phi->time_last_meal = NULL;
 		return (-1);
 	}
@@ -95,7 +91,6 @@ phi->time_last_meal->tv_usec) * 0.001) > phi->parameters->time_to_die))
 
 int			taking_forks(t_philosopher *phi)
 {
-	int				ret;
 	struct timeval	time_action;
 
 	if (!phi->time_last_meal)
@@ -106,16 +101,14 @@ int			taking_forks(t_philosopher *phi)
 		throw_error(ERROR_SEM);
 	if (gettimeofday(&time_action, NULL))
 		throw_error(ERROR_TIMEOFDAY);
-	if ((ret = logs(phi->parameters->time_start, &time_action, phi->nb,
-" has taken a fork\n")))
-		throw_error(ret);
+	logs(phi->parameters->time_start, &time_action, phi->nb,
+" has taken a fork\n");
 	if (sem_wait(phi->parameters->forks))
 		throw_error(ERROR_SEM);
 	if (gettimeofday(&time_action, NULL))
 		throw_error(ERROR_TIMEOFDAY);
-	if ((ret = logs(phi->parameters->time_start, &time_action, phi->nb,
-" has taken a fork\n")))
-		throw_error(ret);
+	logs(phi->parameters->time_start, &time_action, phi->nb,
+" has taken a fork\n");
 	if (sem_post(phi->parameters->available_eat))
 		throw_error(ERROR_SEM);
 	return (0);
@@ -138,22 +131,22 @@ int			routine(t_philosopher *phi)
 	int				ret;
 	struct timeval	time_action;
 
-	if ((ret = check_eating(phi)) || (phi->nb_eat ==
-phi->parameters->number_of_time_each_philosophers_must_eat && (ret = 1)))
-		return (ret);
+	if ((ret = check_eating(phi)))
+		return (-1);
+	if (phi->nb_eat ==
+phi->parameters->number_of_time_each_philosophers_must_eat)
+		return (1);
 	if (gettimeofday(&time_action, NULL))
 		throw_error(ERROR_TIMEOFDAY);
-	if ((ret = logs(phi->parameters->time_start,
-&time_action, phi->nb, " is sleeping\n")))
-		throw_error(ret);
+	logs(phi->parameters->time_start,
+&time_action, phi->nb, " is sleeping\n");
 	usleep(phi->parameters->time_to_sleep * 1000);
 	if (!phi->time_last_meal)
 		return (1);
 	if (gettimeofday(&time_action, NULL))
 		throw_error(ERROR_TIMEOFDAY);
-	if ((ret = logs(phi->parameters->time_start,
-&time_action, phi->nb, " is thinking\n")))
-		throw_error(ret);
+	logs(phi->parameters->time_start,
+&time_action, phi->nb, " is thinking\n");
 	return (0);
 }
 
@@ -161,7 +154,7 @@ phi->parameters->number_of_time_each_philosophers_must_eat && (ret = 1)))
 ** function: {alive}
 **
 ** parameters:
-** (void *){args} - contain philosopher's structure
+** (philosopher *){phi} - contain philosopher's structure
 **
 ** return (void) - just exiting if the philosopher is dead
 **
@@ -171,16 +164,13 @@ phi->parameters->number_of_time_each_philosophers_must_eat && (ret = 1)))
 ** philosopher died so it exit the function resulting of a kill of the pthread.
 */
 
-void		alive(void *args)
+void		alive(t_philosopher *phi)
 {
 	int				ret;
-	t_philosopher	*phi;
 
-	phi = (t_philosopher *)args;
-	while (!taking_forks(phi))
-	{
-		if ((ret = routine(phi)))
-			exit((ret == 1) ? 0 : 1);
-	}
+	while (!taking_forks(phi) && !(ret = routine(phi)))
+		NULL;
+	if (ret == -1)
+		exit(1);
 	exit(0);
 }

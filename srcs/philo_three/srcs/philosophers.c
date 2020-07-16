@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/29 21:16:37 by lmartin           #+#    #+#             */
-/*   Updated: 2020/07/16 13:44:53 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/07/16 16:10:24 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,8 +44,7 @@ int		wait_philosophers(t_philo_three *phi)
 		ptr = phi->philosophers;
 		while (ptr)
 		{
-			if (kill(ptr->pid, SIGINT))
-				throw_error(ERROR_KILL);
+			kill(ptr->pid, SIGINT);
 			ptr = ptr->next;
 		}
 	}
@@ -82,11 +81,15 @@ int		launch_philosophers(t_philo_three *phi)
 		ptr->nb_eat = 0;
 		if (!(ptr->parameters = copy_parameters(phi->parameters)))
 			return (ERROR_MALLOC);
+		ptr = ptr->next;
+	}
+	ptr = phi->philosophers;
+	while (ptr)
+	{
 		if (!(pid = fork()))
-			alive((void *)ptr);
-		if (pid < 0)
+			alive(ptr);
+		if ((ptr->pid = pid) < 0)
 			return (ERROR_FORK);
-		ptr->pid = pid;
 		ptr = ptr->next;
 	}
 	return (wait_philosophers(phi) + usleep(100000));
