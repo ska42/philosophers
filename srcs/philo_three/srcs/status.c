@@ -95,18 +95,16 @@ int			taking_forks(t_philosopher *phi)
 
 	if (!phi->time_last_meal)
 		return (1);
+	if (gettimeofday(&time_action, NULL))
+		throw_error(ERROR_TIMEOFDAY);
 	if (sem_wait(phi->parameters->available_eat))
 		throw_error(ERROR_SEM);
 	if (sem_wait(phi->parameters->forks))
 		throw_error(ERROR_SEM);
-	if (gettimeofday(&time_action, NULL))
-		throw_error(ERROR_TIMEOFDAY);
 	logs(phi->parameters->time_start, &time_action, phi->nb,
 " has taken a fork\n");
 	if (sem_wait(phi->parameters->forks))
 		throw_error(ERROR_SEM);
-	if (gettimeofday(&time_action, NULL))
-		throw_error(ERROR_TIMEOFDAY);
 	logs(phi->parameters->time_start, &time_action, phi->nb,
 " has taken a fork\n");
 	if (sem_post(phi->parameters->available_eat))
