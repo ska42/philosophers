@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/09 03:18:32 by lmartin           #+#    #+#             */
-/*   Updated: 2020/07/16 16:10:37 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/07/17 04:30:10 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ int			eating(t_philosopher *phi)
 	logs(phi->parameters->time_start, phi->time_last_meal,
 phi->nb, " is eating\n");
 	phi->nb_eat++;
-	usleep(phi->parameters->time_to_eat * 1000);
+	ft_usleep(phi->parameters->time_to_eat * 1000);
 	return (0);
 }
 
@@ -141,7 +141,7 @@ phi->parameters->number_of_time_each_philosophers_must_eat)
 		throw_error(ERROR_TIMEOFDAY);
 	logs(phi->parameters->time_start,
 &time_action, phi->nb, " is sleeping\n");
-	usleep(phi->parameters->time_to_sleep * 1000);
+	ft_usleep(phi->parameters->time_to_sleep * 1000);
 	if (!phi->time_last_meal)
 		return (1);
 	if (gettimeofday(&time_action, NULL))

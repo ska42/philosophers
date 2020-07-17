@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/24 03:41:19 by lmartin           #+#    #+#             */
-/*   Updated: 2020/07/17 03:06:32 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/07/17 04:34:18 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ int		wait_philosophers(t_philo_two *phi)
 
 	c = 0;
 	ptr = phi->philosophers;
-	while (ptr && (c = (ptr->nb_eat < 
+	while (ptr && (c = (ptr->nb_eat <
 phi->parameters->number_of_time_each_philosophers_must_eat ? 0 : c + 1) > -2))
 		if (!ptr->time_last_meal || !ptr->next)
 			ptr = (ptr->time_last_meal &&

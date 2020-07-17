@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/09 00:03:02 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/23 23:15:15 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/07/17 04:33:28 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,6 +58,22 @@ int		throw_error(int error)
 	else if (error == ERROR_TIMEOFDAY)
 		msg_error("Error: gettimeofday error\n");
 	return (error);
+}
+
+void	ft_usleep(unsigned int n)
+{
+	struct timeval	start;
+	struct timeval	step;
+
+	gettimeofday(&start, NULL);
+	while (1)
+	{
+		usleep(50);
+		gettimeofday(&step, NULL);
+		if ((size_t)(((size_t)(step.tv_sec - start.tv_sec)) * 1000000 +
+((size_t)(step.tv_usec - start.tv_usec))) > n)
+			break ;
+	}
 }
 
 /*

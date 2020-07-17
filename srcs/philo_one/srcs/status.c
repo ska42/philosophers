@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/09 03:18:32 by lmartin           #+#    #+#             */
-/*   Updated: 2020/06/29 22:29:25 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/07/17 04:28:55 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,8 +40,7 @@ int			eating(t_philosopher *phi)
 phi->nb, " is eating\n")))
 		throw_error(ret);
 	phi->nb_eat++;
-	if (usleep(phi->parameters->time_to_eat * 1000))
-		throw_error(ERROR_SLEEP);
+	ft_usleep(phi->parameters->time_to_eat * 1000);
 	if (pthread_mutex_unlock(phi->lock_last_meal))
 		throw_error(ERROR_MUTEX);
 	return (0);
@@ -156,8 +155,7 @@ phi->parameters->number_of_time_each_philosophers_must_eat && (ret = 1)))
 	if ((ret = logs(phi->parameters->time_start,
 &time_action, phi->nb, " is sleeping\n")))
 		throw_error(ret);
-	if (usleep(phi->parameters->time_to_sleep * 1000))
-		throw_error(ERROR_SLEEP);
+	ft_usleep(phi->parameters->time_to_sleep * 1000);
 	if (!phi->time_last_meal)
 		return (1);
 	if (gettimeofday(&time_action, NULL))
