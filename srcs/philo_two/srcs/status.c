@@ -26,22 +26,19 @@
 
 int			eating(t_philosopher *phi)
 {
-	int		ret;
-
 	if (!phi->time_last_meal)
 	{
 		if (sem_post(phi->sem_last_meal))
 			throw_error(ERROR_SEM);
 		return (1);
 	}
-	if (gettimeofday(phi->time_last_meal, NULL))
-		throw_error(ERROR_TIMEOFDAY);
-	if ((ret = logs(phi->parameters->time_start, phi->time_last_meal,
-phi->nb, " is eating\n")))
-		throw_error(ret);
 	phi->nb_eat++;
 	if (sem_post(phi->sem_last_meal))
 		throw_error(ERROR_SEM);
+	if (gettimeofday(phi->time_last_meal, NULL))
+		throw_error(ERROR_TIMEOFDAY);
+	logs(phi->parameters->time_start, phi->time_last_meal,
+phi->nb, " is eating\n");
 	if (usleep(phi->parameters->time_to_eat * 1000))
 		throw_error(ERROR_SLEEP);
 	return (0);
@@ -65,26 +62,23 @@ int			check_eating(t_philosopher *phi)
 	int				ret;
 	struct timeval	time_action;
 
-	if (gettimeofday(&time_action, NULL))
-		throw_error(ERROR_TIMEOFDAY);
 	if (sem_wait(phi->sem_last_meal))
 		throw_error(ERROR_SEM);
+	if (gettimeofday(&time_action, NULL))
+		throw_error(ERROR_TIMEOFDAY);
 	if (phi->time_last_meal && ((size_t)((time_action.tv_sec -
 phi->time_last_meal->tv_sec) * 1000 + (time_action.tv_usec -
 phi->time_last_meal->tv_usec) * 0.001) > phi->parameters->time_to_die))
 	{
 		free(phi->time_last_meal);
-		if ((ret = logs(phi->parameters->time_start,
-&time_action, phi->nb, " died\n")))
-			throw_error(ret);
+		logs(phi->parameters->time_start,
+&time_action, phi->nb, " died\n");
 		phi->time_last_meal = NULL;
 	}
 	ret = eating(phi);
 	if (sem_post(phi->parameters->forks))
 		throw_error(ERROR_SEM);
 	if (sem_post(phi->parameters->forks))
-		throw_error(ERROR_SEM);
-	if (sem_post(phi->parameters->available_eat))
 		throw_error(ERROR_SEM);
 	return (ret);
 }
@@ -105,7 +99,6 @@ phi->time_last_meal->tv_usec) * 0.001) > phi->parameters->time_to_die))
 
 int			taking_forks(t_philosopher *phi)
 {
-	int				ret;
 	struct timeval	time_action;
 
 	if (!phi->time_last_meal)
@@ -114,18 +107,16 @@ int			taking_forks(t_philosopher *phi)
 		throw_error(ERROR_SEM);
 	if (sem_wait(phi->parameters->forks))
 		throw_error(ERROR_SEM);
-	if (gettimeofday(&time_action, NULL))
-		throw_error(ERROR_TIMEOFDAY);
-	if ((ret = logs(phi->parameters->time_start, &time_action, phi->nb,
-" has taken a fork\n")))
-		throw_error(ret);
 	if (sem_wait(phi->parameters->forks))
+		throw_error(ERROR_SEM);
+	if (sem_post(phi->parameters->available_eat))
 		throw_error(ERROR_SEM);
 	if (gettimeofday(&time_action, NULL))
 		throw_error(ERROR_TIMEOFDAY);
-	if ((ret = logs(phi->parameters->time_start, &time_action, phi->nb,
-" has taken a fork\n")))
-		throw_error(ret);
+	logs(phi->parameters->time_start, &time_action, phi->nb,
+" has taken a fork\n");
+	logs(phi->parameters->time_start, &time_action, phi->nb,
+" has taken a fork\n");
 	return (0);
 }
 
@@ -143,26 +134,23 @@ int			taking_forks(t_philosopher *phi)
 
 int			routine(t_philosopher *phi)
 {
-	int				ret;
 	struct timeval	time_action;
 
-	if ((ret = check_eating(phi)) || (phi->nb_eat ==
-phi->parameters->number_of_time_each_philosophers_must_eat && (ret = 1)))
-		return (ret);
+	if (check_eating(phi) || (phi->nb_eat ==
+phi->parameters->number_of_time_each_philosophers_must_eat))
+		return (1);
 	if (gettimeofday(&time_action, NULL))
 		throw_error(ERROR_TIMEOFDAY);
-	if ((ret = logs(phi->parameters->time_start,
-&time_action, phi->nb, " is sleeping\n")))
-		throw_error(ret);
+	logs(phi->parameters->time_start,
+&time_action, phi->nb, " is sleeping\n");
 	if (usleep(phi->parameters->time_to_sleep * 1000))
 		throw_error(ERROR_SLEEP);
 	if (!phi->time_last_meal)
 		return (1);
 	if (gettimeofday(&time_action, NULL))
 		throw_error(ERROR_TIMEOFDAY);
-	if ((ret = logs(phi->parameters->time_start,
-&time_action, phi->nb, " is thinking\n")))
-		throw_error(ret);
+	logs(phi->parameters->time_start,
+&time_action, phi->nb, " is thinking\n");
 	return (0);
 }
 

@@ -27,12 +27,12 @@
 int		wait_philosophers(t_philo_two *phi)
 {
 	int				c;
-	size_t			nb;
 	t_philosopher	*ptr;
 
-	nb = phi->parameters->number_of_time_each_philosophers_must_eat;
+	c = 0;
 	ptr = phi->philosophers;
-	while (ptr && (c = (ptr->nb_eat < nb) ? 0 : c + 1) > -2)
+	while (ptr && (c = (ptr->nb_eat < 
+phi->parameters->number_of_time_each_philosophers_must_eat ? 0 : c + 1) > -2))
 		if (!ptr->time_last_meal || !ptr->next)
 			ptr = (ptr->time_last_meal &&
 c < phi->parameters->number_of_philosophers) ? phi->philosophers : NULL;
