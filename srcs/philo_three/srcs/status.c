@@ -65,12 +65,15 @@ phi->time_last_meal->tv_usec) * 0.001) > phi->parameters->time_to_die))
 		logs(phi->parameters->time_start,
 &time_action, phi->nb, " died\n");
 		phi->time_last_meal = NULL;
-		return (-1);
+		ret = -1;
 	}
-	ret = eating(phi);
+	else
+		ret = eating(phi);
 	if (sem_post(phi->parameters->forks))
 		throw_error(ERROR_SEM);
 	if (sem_post(phi->parameters->forks))
+		throw_error(ERROR_SEM);
+	if (sem_post(phi->parameters->available_eat))
 		throw_error(ERROR_SEM);
 	return (ret);
 }
@@ -109,8 +112,6 @@ int			taking_forks(t_philosopher *phi)
 		throw_error(ERROR_TIMEOFDAY);
 	logs(phi->parameters->time_start, &time_action, phi->nb,
 " has taken a fork\n");
-	if (sem_post(phi->parameters->available_eat))
-		throw_error(ERROR_SEM);
 	return (0);
 }
 
