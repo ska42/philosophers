@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/09 03:18:32 by lmartin           #+#    #+#             */
-/*   Updated: 2020/07/16 14:06:32 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/07/17 03:08:59 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,24 +106,26 @@ phi->time_last_meal->tv_usec) * 0.001) > phi->parameters->time_to_die))
 int			taking_forks(t_philosopher *phi)
 {
 	int				ret;
-	int				i;
 	struct timeval	time_action;
 
 	if (!phi->time_last_meal)
 		return (1);
 	if (sem_wait(phi->parameters->available_eat))
 		throw_error(ERROR_SEM);
-	i = 0;
-	while (i++ < 2)
-	{
-		if (sem_wait(phi->parameters->forks))
-			throw_error(ERROR_SEM);
-		if (gettimeofday(&time_action, NULL))
-			throw_error(ERROR_TIMEOFDAY);
-		if ((ret = logs(phi->parameters->time_start, &time_action, phi->nb,
+	if (sem_wait(phi->parameters->forks))
+		throw_error(ERROR_SEM);
+	if (gettimeofday(&time_action, NULL))
+		throw_error(ERROR_TIMEOFDAY);
+	if ((ret = logs(phi->parameters->time_start, &time_action, phi->nb,
 " has taken a fork\n")))
-			throw_error(ret);
-	}
+		throw_error(ret);
+	if (sem_wait(phi->parameters->forks))
+		throw_error(ERROR_SEM);
+	if (gettimeofday(&time_action, NULL))
+		throw_error(ERROR_TIMEOFDAY);
+	if ((ret = logs(phi->parameters->time_start, &time_action, phi->nb,
+" has taken a fork\n")))
+		throw_error(ret);
 	return (0);
 }
 
