@@ -84,6 +84,8 @@ phi->time_last_meal->tv_usec) * 0.001) > phi->parameters->time_to_die))
 		throw_error(ERROR_SEM);
 	if (sem_post(phi->parameters->forks))
 		throw_error(ERROR_SEM);
+	if (sem_post(phi->parameters->available_eat))
+		throw_error(ERROR_SEM);
 	return (ret);
 }
 
@@ -122,8 +124,6 @@ int			taking_forks(t_philosopher *phi)
 " has taken a fork\n")))
 			throw_error(ret);
 	}
-	if (sem_post(phi->parameters->available_eat))
-		throw_error(ERROR_SEM);
 	return (0);
 }
 
