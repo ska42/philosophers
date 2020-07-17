@@ -6,7 +6,7 @@
 /*   By: lmartin <lmartin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/06/24 03:41:19 by lmartin           #+#    #+#             */
-/*   Updated: 2020/07/16 14:46:02 by lmartin          ###   ########.fr       */
+/*   Updated: 2020/07/17 03:06:32 by lmartin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,16 +72,19 @@ int		launch_philosophers(t_philo_two *phi)
 
 	if (!(phi->parameters->time_start = malloc(sizeof(struct timeval))))
 		return (ERROR_MALLOC);
-	if (gettimeofday(phi->parameters->time_start, NULL))
-		return (ERROR_TIMEOFDAY);
+	gettimeofday(phi->parameters->time_start, NULL);
 	ptr = phi->philosophers;
-	while (ptr)
+	while (ptr && !(ptr->nb_eat = 0))
 	{
 		ptr->time_last_meal->tv_sec = phi->parameters->time_start->tv_sec;
 		ptr->time_last_meal->tv_usec = phi->parameters->time_start->tv_usec;
-		ptr->nb_eat = 0;
 		if (!(ptr->parameters = copy_parameters(phi->parameters)))
 			return (ERROR_MALLOC);
+		ptr = ptr->next;
+	}
+	ptr = phi->philosophers;
+	while (ptr)
+	{
 		if (pthread_create(ptr->thread, NULL, &alive, ptr))
 			return (ERROR_PTHREAD);
 		ptr = ptr->next;
