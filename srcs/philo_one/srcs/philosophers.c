@@ -74,7 +74,7 @@ int		wait_philosophers(t_philo_one *phi)
 
 	nb = phi->parameters->number_of_time_each_philosophers_must_eat;
 	ptr = phi->philosophers;
-	while (ptr && (c = (ptr->nb_eat < nb) ? 0 : c + 1) > -2)
+	while (ptr && !usleep(1000) && (c = (ptr->nb_eat < nb) ? 0 : c + 1) > -2)
 		if (!ptr->time_last_meal || !ptr->next)
 			ptr = (ptr->time_last_meal &&
 c < phi->parameters->number_of_philosophers) ? phi->philosophers : NULL;
